@@ -1,4 +1,6 @@
-source environ.sh
+#!/bin/bash
+CDIR=$(dirname -- "${BASH_SOURCE[0]}")
+source $CDIR/environ.sh
 
 REPO="https://github.com/eza-community/eza"
 TARGET_ARCH="x86_64"
@@ -19,7 +21,7 @@ if [ ! -f $ORIG_FILENAME ]; then
   exit
 fi
 
-tar zxvf $ORIG_FILENAME
+tar zvf $ORIG_FILENAME
 
 install -Dm755 "eza" "${DPKG_DIR}/usr/bin/eza"
 
@@ -38,8 +40,7 @@ Description: eza is a modern alternative for the venerable file-listing command-
   extended attributes, and Git. And it’s small, fast, and just one single binary.
 EOF
 
-mkdir -p dist
-DPKG_PATH="./dist/$DPKG_NAME"
+DPKG_PATH="$OUTPUT_FOLDER/$DPKG_NAME"
 
 fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}"
 rm -fr eza ${DPKG_DIR} $ORIG_FILENAME
