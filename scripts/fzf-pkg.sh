@@ -1,4 +1,3 @@
-#!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
 source $CDIR/environ.sh
 
@@ -11,13 +10,14 @@ DPKG_DIR="fzf-v$DPKG_VERSION-$TARGET_ARCH"
 DPKG_CONFLICTS=""
 DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
 
-wget $URL
+
+$WGET $URL
 
 if [ ! -f $ORIG_FILENAME ]; then
   echo Error downloading file.
   exit
 fi
-tar zvf $ORIG_FILENAME
+tar zxf $ORIG_FILENAME
 
 
 install -Dm755 "fzf" "${DPKG_DIR}/usr/bin/fzf"
@@ -37,7 +37,7 @@ Description: fzf is a general-purpose command-line fuzzy finder.
   characters and still get the results you want.
 EOF
 
-DPKG_PATH="$OUTPUT_FOLDER/$DPKG_NAME"
+DPKG_PATH="./$OUTPUT_FOLDER/$DPKG_NAME"
 
 fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}"
 rm -fr fzf ${DPKG_DIR} $ORIG_FILENAME

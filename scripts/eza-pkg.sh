@@ -14,14 +14,14 @@ DPKG_CONFLICTS=""
 DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
 
 
-wget $URL
+$WGET $URL
 
 if [ ! -f $ORIG_FILENAME ]; then
   echo Error downloading file.
   exit
 fi
 
-tar zvf $ORIG_FILENAME
+tar zxf $ORIG_FILENAME
 
 install -Dm755 "eza" "${DPKG_DIR}/usr/bin/eza"
 
@@ -40,7 +40,7 @@ Description: eza is a modern alternative for the venerable file-listing command-
   extended attributes, and Git. And it’s small, fast, and just one single binary.
 EOF
 
-DPKG_PATH="$OUTPUT_FOLDER/$DPKG_NAME"
+DPKG_PATH="./$OUTPUT_FOLDER/$DPKG_NAME"
 
 fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}"
 rm -fr eza ${DPKG_DIR} $ORIG_FILENAME

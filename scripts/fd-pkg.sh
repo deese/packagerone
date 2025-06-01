@@ -14,7 +14,7 @@ DPKG_CONFLICTS="fd-find"
 DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
 
 
-wget $URL
+$WGET $URL
 tar zxvf fd-v$DPKG_VERSION-$DPKG_ARCH-unknown-linux-gnu.tar.gz
 
 install -Dm755 "${FOLDER_ORIG}/fd" "${DPKG_DIR}/usr/bin/fd"
@@ -50,9 +50,7 @@ Description: simple, fast and user-friendly alternative to find
   sensible (opinionated) defaults for a majority of use cases.
 EOF
 
-mkdir -p dist
-
-DPKG_PATH="./dist/$DPKG_NAME"
+DPKG_PATH="./$OUTPUT_FOLDER/$DPKG_NAME"
 
 fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}"
 rm -fr ${FOLDER_ORIG} ${DPKG_DIR} fd-*-unknown-linux-gnu.tar.gz
