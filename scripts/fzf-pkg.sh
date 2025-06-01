@@ -41,4 +41,3 @@ DPKG_PATH="./$OUTPUT_FOLDER/$DPKG_NAME"
 
 fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}"
 rm -fr fzf ${DPKG_DIR} $ORIG_FILENAME
-

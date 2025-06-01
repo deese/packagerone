@@ -4,6 +4,8 @@ TARGET_ARCH="x86_64"
 WGET="wget -q"
 OUTPUT_FOLDER="dist"
 
+mkdir -p $OUTPUT_FOLDER
+
 function read_env() {
   local filePath="${1:-.env}"
   echo Loading environment  $filePath
@@ -22,5 +24,3 @@ function read_env() {
     fi
   done < "$filePath"
 }
-
-

@@ -1,6 +1,6 @@
+#!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
 source $CDIR/environ.sh
-
 
 REPO="https://github.com/eza-community/eza"
 TARGET_ARCH="x86_64"
