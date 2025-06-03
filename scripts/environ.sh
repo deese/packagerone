@@ -5,6 +5,8 @@ WGET="wget -q"
 OUTPUT_FOLDER="dist"
 PKG1UPLOADTRK=".upload_tracker"
 
+mkdir -p $OUTPUT_FOLDER
+
 function read_env() {
   local filePath="${1:-.env}"
   echo Loading environment  $filePath
@@ -39,4 +41,3 @@ function vprint {
 		echo $*
 	fi
 }
-
