@@ -9,9 +9,20 @@ Currently the following packages are handled:
 - Deb created from binary release: eza, fzf, fx
 
 
+Configuration
+=============
+
+As an example, I'm uploading the resulting deb files to buildkite and this is my .env file
+
+BK_TOKEN=<token>
+BK_ORG=<organization>
+BK_REGISTRY=<registry_name>
+PKG1UPLOADER=buildkite
+VERBOSE=0
+
 TODO
 ====
 
 
 - Create the uploader for Buildkite in Python to avoid multiple uploads.
-- Create a version tracker to avoid manually updating the versions.
+- ~~Create a version tracker to avoid manually updating the versions.~~

@@ -3,6 +3,7 @@ DPKG_ARCH="amd64"
 TARGET_ARCH="x86_64"
 WGET="wget -q"
 OUTPUT_FOLDER="dist"
+PKG1UPLOADTRK=".upload_tracker"
 
 function read_env() {
   local filePath="${1:-.env}"
@@ -23,4 +24,19 @@ function read_env() {
   done < "$filePath"
 }
 
+function get_latest_ver () {
+	OUTPUT=$(curl -qs https://api.github.com/repos/$1/releases/latest)
+	if [[ "$OUTPUT" == *"API rate limit exceeded for"* ]]; then
+	  echo "Github API exceeded. Try later." 
+	  return 1 
+	fi
+	echo "$OUTPUT"| jq -r '.tag_name'
+	return 0
+}
+
+function vprint {
+	if [ ! -z $VERBOSE ] && [ $VERBOSE -eq 1 ]; then
+		echo $*
+	fi
+}
 

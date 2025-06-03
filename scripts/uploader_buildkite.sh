@@ -10,12 +10,32 @@ function upload {
 
 	for i in $OUTPUT_FOLDER/*; do 
 	  if [ -f "$i" ]; then
+	     if grep -Fxq $i $PKG1UPLOADTRK; then
+               echo "\[$(basename ${BASH_SOURCE[0]})\] File already uploaded: $i"
+	       continue
+	     fi 
 	     echo Uploading $i
-	     curl -X POST https://api.buildkite.com/v2/packages/organizations/$BK_ORG/registries/$BK_REGISTRY/packages \
+	     OUTPUT=$(curl -X POST -qs https://api.buildkite.com/v2/packages/organizations/$BK_ORG/registries/$BK_REGISTRY/packages \
 	     -H "Authorization: Bearer $BK_TOKEN" \
-	     -F "file=@$i"
+	     -F "file=@$i")
+	    
+	     echo $OUTPUT
+	     check_output $i "$OUTPUT" 
 	  fi
 	done
+}
+
+function check_output {
+	filename=$1
+	output="$2"
+	if [[ "$output" == *"This registry does not support that package type"* ]]; then
+	    echo "Upload FAILED: $( echo $output | jq -r '.message')"
+	elif [[ "$output" == *"A package with that name already exists"* || "$output" == *'{"id":'* ]]; then
+	    echo "SUCCESS"
+            echo $filename >> $PKG1UPLOADTRK
+	else
+	    echo "Upload FAILED: $(echo $output | jq -r '.message')"
+	fi
 }
 
 function tester {
@@ -26,6 +46,6 @@ PACKAGES=$(curl -H "Authorization: Bearer $BK_TOKEN" \
 echo $PACKAGES
 }
 
-tester
+#tester
 
-# upload
+upload
