@@ -6,7 +6,7 @@ Small set of scripts that creates a debian package from binary packages (usually
 Currently the following packages are handled:
 
 - Direct download from github in deb form: zoxide, fd, hexyl, bat, ripgrep
-- Deb created from binary release: eza, fzf, fx
+- Deb created from binary release: eza, fzf, fx, neovim (appimage)
 
 
 Configuration
@@ -14,12 +14,13 @@ Configuration
 
 As an example, I'm uploading the resulting deb files to buildkite and this is my .env file
 
+```
 BK_TOKEN=<token>
 BK_ORG=<organization>
 BK_REGISTRY=<registry_name>
 PKG1UPLOADER=buildkite
 VERBOSE=0
-
+```
 TODO
 ====
 
