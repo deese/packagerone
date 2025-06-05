@@ -15,8 +15,8 @@ for entry in "${packages[@]}"; do
   version=$(get_latest_ver $repo)
   if [ $? -eq 1 ]; then
      echo Fatal error: $version
-     exit 1 
-  fi 
+     exit 1
+  fi
 
   F_VERSION="${version#v}"
   filename="${filename//\$VERSION/$F_VERSION}"
@@ -27,7 +27,7 @@ for entry in "${packages[@]}"; do
     echo "Filename: $filename"
     echo "-----"
     $WGET "https://github.com/$repo/releases/download/$version/$filename" -O $OUTPUT_FOLDER/$filename
-  else 
+  else
     vprint [debup] File already exist: $filename
   fi
 done
