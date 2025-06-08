@@ -40,5 +40,5 @@ for entry in "${packages[@]}"; do
   else
     vprint [debup] File already exist: $filename
   fi
-exit 0
 done
+exit 0

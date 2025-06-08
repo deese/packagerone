@@ -38,7 +38,7 @@ fi
 
 bash ./scripts/deb-updater.sh
 
-for i in forumlas/*.formula; do  
+for i in formulas/*.formula; do  
   build_package $i
 done
 

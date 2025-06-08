@@ -1,10 +1,11 @@
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
 MAINTAINER="Deese <deese2k@gmail.com>"
 DPKG_ARCH="amd64"
 TARGET_ARCH="x86_64"
 WGET="wget -q"
 OUTPUT_FOLDER="dist"
 PKG1UPLOADTRK=".upload_tracker"
-DB_FILE="/home/deese/packagerone/versions.db"
+DB_FILE="$SCRIPT_DIR/versions.db"
 
 mkdir -p $OUTPUT_FOLDER
 

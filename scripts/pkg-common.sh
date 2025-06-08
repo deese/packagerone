@@ -53,8 +53,8 @@ build_package() {
     fi
 
     # Download file
-    DOWNLOAD_FILENAME=$(var_substitution $DOWNLOAD_FILENAME)
-    DOWNLOAD_URL=$(var_substitution $DOWNLOAD_URL_TEMPLATE)
+    DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
+    DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
 
     $WGET "$DOWNLOAD_URL"
 
