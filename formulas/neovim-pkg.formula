@@ -1,0 +1,15 @@
+REPO="neovim/neovim"
+DPKG_BASENAME="neovim"
+DOWNLOAD_FILENAME="nvim-linux-\$TARGET_ARCH.appimage"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD=""
+INSTALL_FILES=(
+    "\$DOWNLOAD_FILENAME|755|/usr/bin/fx"
+)
+PACKAGE_DESCRIPTION="Neovim is a project that seeks to aggressively refactor Vim in order to:
+	Simplify maintenance and encourage contributions
+	Split the work between multiple developers
+	Enable advanced UIs without modifications to the core
+	Maximize extensibility
+	See the Introduction wiki page and Roadmap for more information."
+

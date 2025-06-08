@@ -1,0 +1,9 @@
+REPO="antonmedv/fx"
+DPKG_BASENAME="fx"
+DOWNLOAD_FILENAME="fx_linux_\$DPKG_ARCH"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/fx_linux_\$DPKG_ARCH"
+EXTRACT_CMD=""
+INSTALL_FILES=(
+    "\$DOWNLOAD_FILENAME|755|/usr/bin/fx"
+)
+PACKAGE_DESCRIPTION="Fx is a CLI for JSON: it shows JSON interactively in your terminal, and lets you transform JSON with JavaScript. Fx is written in Go and uses goja as its embedded JavaScript engine."
