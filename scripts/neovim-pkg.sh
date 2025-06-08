@@ -8,6 +8,12 @@ if [ $? -eq 1 ]; then
      echo Fatal error: $version
      exit 1
 fi
+CURRENT_VERSION=$(get_stored_version "$REPO")
+
+if [[ "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
+   echo "[INFO] $REPO is up to date ($CURRENT_VERSION)"
+   exit 0
+fi
 
 DPKG_VERSION="${LATEST_VER#v}"
 DPKG_BASENAME="neovim"

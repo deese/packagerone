@@ -1,13 +1,20 @@
 #!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
 source $CDIR/environ.sh
-
 REPO="eza-community/eza"
+echo $CHANGES_FILE
 LATEST_VER=$(get_latest_ver $REPO)
 
 if [ $? -eq 1 ]; then
-     echo Fatal error: $version
+     echo Fatal error: $LATEST_VER
      exit 1
+fi
+
+CURRENT_VERSION=$(get_stored_version "$REPO")
+
+if [[ "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
+   echo "[INFO] $REPO is up to date ($CURRENT_VERSION)"
+   exit 0
 fi
 
 
