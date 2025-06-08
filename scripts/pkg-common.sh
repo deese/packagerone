@@ -1,7 +1,7 @@
 #!/bin/bash
 
 var_substitution() {
-    VARS_TO_SUBST=(REPO DPKG_ARCH TARGET_ARCH DPKG_BASENANE LATEST_VER DOWNLOAD_FILENAME )
+    VARS_TO_SUBST=(REPO DPKG_ARCH TARGET_ARCH DPKG_BASENANE LATEST_VER DOWNLOAD_FILENAME DPKG_VERSION)
     RET=$1
     for var in "${VARS_TO_SUBST[@]}"; do
         if [[ -n "${!var+x}" ]]; then
@@ -37,7 +37,7 @@ build_package() {
     CURRENT_VERSION=$(get_stored_version "$REPO")
     if [[ "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
         echo "[INFO] $REPO is up to date ($CURRENT_VERSION)"
-        exit 0
+        return 0
     fi
 
     # Setup package variables
@@ -49,7 +49,7 @@ build_package() {
     # Check if package already exists
     if [ -f "$DPKG_PATH" ]; then
         echo "File already exists: $DPKG_PATH"
-        exit 0
+        return 0
     fi
 
     # Download file
@@ -60,7 +60,7 @@ build_package() {
 
     if [ ! -f "$DOWNLOAD_FILENAME" ]; then
         echo "Error downloading file: $DOWNLOAD_URL"
-        exit 1
+        return  0
     fi
 
     # Extract if needed
@@ -101,4 +101,5 @@ EOF
     set_stored_version "$REPO" "$LATEST_VER"
     echo "[SUCCESS] Built $DPKG_PATH"
     echo 1 > "$CHANGES_FILE"
+    return 0 
 }

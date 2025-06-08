@@ -69,6 +69,10 @@ function date_diff {
 
 function get_stored_version() {
     local repo="$1"
+    if [ ! -f $DB_FILE ]; then
+      echo ""
+      return 0
+    fi
     grep -E "^${repo}=" "$DB_FILE" 2>/dev/null | cut -d'=' -f2
 }
 
