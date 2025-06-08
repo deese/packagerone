@@ -36,10 +36,9 @@ if [[ $check_versions -eq 1 ]]; then
   exit 1
 fi
 
-#bash ./scripts/deb-updater.sh
+bash ./scripts/deb-updater.sh
 
-for i in scripts/*.formula; do  
-  echo $i
+for i in forumlas/*.formula; do  
   build_package $i
 done
 
