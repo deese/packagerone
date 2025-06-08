@@ -1,8 +1,9 @@
 #!/bin/bash
 set -e
 source scripts/environ.sh
-export CHANGES_FILE=$(mktemp --suffix ".changes")
+source scripts/pkg-common.sh
 
+export CHANGES_FILE=$(mktemp --suffix ".changes")
 
 function cleanup {
   if [ -f $CHANGES_FILE ]; then
@@ -35,11 +36,13 @@ if [[ $check_versions -eq 1 ]]; then
   exit 1
 fi
 
-for i in deb-updater.sh eza-pkg.sh fzf-pkg.sh fx-pkg.sh neovim-pkg.sh; do
-  bash ./scripts/$i
+bash ./scripts/deb-updater.sh
+
+for i in scripts/*.formula; do
+  build_package $i
 done
 
-if [ -s $CHANGES_FILE ]; then 
+if [ -s $CHANGES_FILE ]; then
 	if [ ! -z "$PKG1UPLOADER" ]; then
 	  if [ ! -f "./scripts/uploader_$PKG1UPLOADER.sh" ]; then
 	    echo "uploader_$PKG1UPLOADER.sh doesn't exit"
