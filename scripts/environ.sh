@@ -4,6 +4,7 @@ TARGET_ARCH="x86_64"
 WGET="wget -q"
 OUTPUT_FOLDER="dist"
 PKG1UPLOADTRK=".upload_tracker"
+DB_FILE="/home/deese/packagerone/versions.db"
 
 mkdir -p $OUTPUT_FOLDER
 
@@ -27,7 +28,16 @@ function read_env() {
 }
 
 function get_latest_ver () {
-	OUTPUT=$(curl -qs https://api.github.com/repos/$1/releases/latest)
+	if [[ ! -z $GITHUB_TOKEN ]]; then
+	   EXTRA_ARGS=(
+            -H "Authorization: Bearer $GITHUB_TOKEN"
+            -H "Accept: application/vnd.github+json"
+	   )
+	   #EXTRA_ARGS="-H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\""
+	else
+           EXTRA_ARGS=() #""
+        fi
+	OUTPUT=$(curl "${EXTRA_ARGS[@]}" -qs https://api.github.com/repos/$1/releases/latest)
 	if [[ "$OUTPUT" == *"API rate limit exceeded for"* ]]; then
 	  echo "Github API exceeded. Try later."
 	  return 1
@@ -55,5 +65,20 @@ function date_diff {
     diff_days=$(( diff_sec / 86400 * -1 ))
 
     echo "$diff_days"
+}
+
+function get_stored_version() {
+    local repo="$1"
+    grep -E "^${repo}=" "$DB_FILE" 2>/dev/null | cut -d'=' -f2
+}
+
+function set_stored_version() {
+    local repo="$1"
+    local version="$2"
+    if grep -qE "^${repo}=" "$DB_FILE"; then
+        sed -i "s|^${repo}=.*|${repo}=${version}|" "$DB_FILE"
+    else
+        echo "${repo}=${version}" >> "$DB_FILE"
+    fi
 }
 

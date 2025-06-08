@@ -1,6 +1,16 @@
 #!/bin/bash
 set -e
 source scripts/environ.sh
+export CHANGES_FILE=$(mktemp --suffix ".changes")
+
+
+function cleanup {
+  if [ -f $CHANGES_FILE ]; then
+    rm -f $CHANGES_FILE
+  fi
+  unset $CHANGES_FILE
+}
+trap cleanup EXIT
 
 read_env
 
@@ -29,12 +39,14 @@ for i in deb-updater.sh eza-pkg.sh fzf-pkg.sh fx-pkg.sh neovim-pkg.sh; do
   bash ./scripts/$i
 done
 
-
-if [ ! -z "$PKG1UPLOADER" ]; then
-  if [ ! -f "./scripts/uploader_$PKG1UPLOADER.sh" ]; then
-    echo "uploader_$PKG1UPLOADER.sh doesn't exit"
-    exit
-  fi
-  echo "Running uploader - $PKG1UPLOADER"
-  bash ./scripts/uploader_$PKG1UPLOADER.sh
+if [ -s $CHANGES_FILE ]; then 
+	if [ ! -z "$PKG1UPLOADER" ]; then
+	  if [ ! -f "./scripts/uploader_$PKG1UPLOADER.sh" ]; then
+	    echo "uploader_$PKG1UPLOADER.sh doesn't exit"
+	    exit
+	  fi
+	  echo "Running uploader - $PKG1UPLOADER"
+	  bash ./scripts/uploader_$PKG1UPLOADER.sh
+	fi
 fi
+
