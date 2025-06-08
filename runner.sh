@@ -9,7 +9,7 @@ function cleanup {
   if [ -f $CHANGES_FILE ]; then
     rm -f $CHANGES_FILE
   fi
-  unset $CHANGES_FILE
+  unset CHANGES_FILE
 }
 trap cleanup EXIT
 
