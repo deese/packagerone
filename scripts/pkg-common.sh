@@ -60,7 +60,7 @@ build_package() {
 
     if [ ! -f "$DOWNLOAD_FILENAME" ]; then
         echo "Error downloading file: $DOWNLOAD_URL"
-        return  0
+        return  1
     fi
 
     # Extract if needed
