@@ -5,7 +5,7 @@ Small set of scripts that creates a debian package from binary packages (usually
 
 Currently the following packages are handled:
 
-- Direct download from github in deb form: zoxide, fd, hexyl, bat, ripgrep, 
+- Direct download from github in deb form: zoxide, fd, hexyl, bat, ripgrep, gopass
 - Deb created from binary release: eza, fzf, fx, neovim (appimage), helix editor (appimage)
 
 
