@@ -7,6 +7,7 @@ packages=(
   "sharkdp/bat|bat_\$VERSION_amd64.deb"
   "sharkdp/hexyl|hexyl_\$VERSION_amd64.deb"
   "burntsushi/ripgrep|ripgrep_\$VERSION-1_amd64.deb"
+  "gopasspw/gopass|gopass_\$VERSION_linux_amd64.deb"
 )
 
 for entry in "${packages[@]}"; do

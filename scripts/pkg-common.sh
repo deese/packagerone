@@ -51,7 +51,6 @@ build_package() {
         echo "File already exists: $DPKG_PATH"
         return 0
     fi
-
     # Download file
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
