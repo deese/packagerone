@@ -1,29 +1,22 @@
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
 source $CDIR/environ.sh
 
-packages=(
-  "ajeetdsouza/zoxide|zoxide_\$VERSION-1_amd64.deb"
-  "sharkdp/fd|fd_\$VERSION_amd64.deb"
-  "sharkdp/bat|bat_\$VERSION_amd64.deb"
-  "sharkdp/hexyl|hexyl_\$VERSION_amd64.deb"
-  "burntsushi/ripgrep|ripgrep_\$VERSION-1_amd64.deb"
-)
-
-for entry in "${packages[@]}"; do
-  #IFS="|" read -r repo filename <<< "$entry"
+function process_deb_file() {
+  entry="$1"
+    #IFS="|" read -r repo filename <<< "$entry"
   repo="${entry%%|*}"
   filename="${entry#*|}"
   current_version=$(get_stored_version "$repo")
-  version=$(get_latest_ver $repo)	
+  version=$(get_latest_ver $repo)
 
   if [ $? -eq 1 ]; then
-     echo Fatal error: $version
-     exit 1
+    echo Fatal error: $version
+    return 1
   fi
 
   if [[ "$version" == "$current_version" ]]; then
-        echo "[INFO] $repo is up to date ($current_version)"
-	continue
+    echo "[INFO] $repo is up to date ($current_version)"
+    continue
   fi
 
   F_VERSION="${version#v}"
@@ -40,5 +33,5 @@ for entry in "${packages[@]}"; do
   else
     vprint [debup] File already exist: $filename
   fi
-done
-exit 0
+  return  0
+}
