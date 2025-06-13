@@ -2,6 +2,15 @@
 set -e
 source scripts/environ.sh
 source scripts/pkg-common.sh
+source scripts/deb-updater.sh
+
+packages=(
+  "ajeetdsouza/zoxide|zoxide_\$VERSION-1_amd64.deb"
+  "sharkdp/fd|fd_\$VERSION_amd64.deb"
+  "sharkdp/bat|bat_\$VERSION_amd64.deb"
+  "sharkdp/hexyl|hexyl_\$VERSION_amd64.deb"
+  "burntsushi/ripgrep|ripgrep_\$VERSION-1_amd64.deb"
+)
 
 export CHANGES_FILE=$(mktemp --suffix ".changes")
 
@@ -36,9 +45,11 @@ if [[ $check_versions -eq 1 ]]; then
   exit 1
 fi
 
-bash ./scripts/deb-updater.sh
+for entry in "${packages[@]}"; do
+  process_deb_file "$entry"
+done
 
-for i in formulas/*.formula; do  
+for i in formulas/*.formula; do
   build_package $i
 done
 
