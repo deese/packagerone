@@ -1,9 +1,9 @@
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
 source $CDIR/environ.sh
 
+
 function process_deb_file() {
   entry="$1"
-    #IFS="|" read -r repo filename <<< "$entry"
   repo="${entry%%|*}"
   filename="${entry#*|}"
   current_version=$(get_stored_version "$repo")

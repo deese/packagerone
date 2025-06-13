@@ -35,7 +35,7 @@ function get_ver {
 
 
 ## Retrieve the repository names from the package scripts
-for file in $CDIR/*-pkg.sh; do
+for file in $CDIR/../formulas/*-pkg.formula; do
     [[ -e "$file" ]] || continue
     REPO=$(awk -F '=' '/^REPO[[:space:]]*=/ {
   gsub(/^[[:space:]]+|[[:space:]]+$/, "", $2);

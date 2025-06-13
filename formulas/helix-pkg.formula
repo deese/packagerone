@@ -1,0 +1,11 @@
+REPO="helix-editor/helix"
+DPKG_BASENAME="helix"
+DOWNLOAD_FILENAME="helix-\$LATEST_VER-\$TARGET_ARCH.AppImage"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD=""
+INSTALL_FILES=(
+    "\$DOWNLOAD_FILENAME|755|/usr/bin/hx"
+)
+PACKAGE_DESCRIPTION="A Kakoune / Neovim inspired editor, written in Rust.
+	The editing model is very heavily based on Kakoune; during development I found myself agreeing with most of Kakoune's design decisions."
+
