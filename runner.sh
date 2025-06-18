@@ -3,6 +3,7 @@ set -e
 source scripts/environ.sh
 source scripts/pkg-common.sh
 source scripts/deb-updater.sh
+source scripts/rpm-builder.sh
 
 packages=(
   "ajeetdsouza/zoxide|zoxide_\$VERSION-1_amd64.deb"
@@ -25,8 +26,11 @@ trap cleanup EXIT
 
 read_env
 
-while getopts "Vvh" opt; do
+while getopts "fVvh" opt; do
   case "$opt" in
+    f)
+      FORCE=1
+      ;;
     V)
       check_versions=1
       ;;
@@ -34,7 +38,7 @@ while getopts "Vvh" opt; do
       VERBOSE=1
       ;;
     *)
-      echo "Usage: $0 [-V] [-v]"
+      echo "Usage: $0 [-V] [-v] [-f]"
       exit 1
       ;;
   esac
@@ -46,13 +50,15 @@ if [[ $check_versions -eq 1 ]]; then
   exit 1
 fi
 
-for entry in "${packages[@]}"; do
-  process_deb_file "$entry"
-done
-
+#for entry in "${packages[@]}"; do
+#  process_deb_file "$entry"
+#done
+echo $FORCE
 for i in formulas/*.formula; do
   build_package $i
 done
+
+exit 0
 
 if [ -s $CHANGES_FILE ]; then
 	if [ ! -z "$PKG1UPLOADER" ]; then

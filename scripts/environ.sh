@@ -87,3 +87,27 @@ function set_stored_version() {
     fi
 }
 
+function var_substitution() {
+    VARS_TO_SUBST=(DOWNLOAD_FILENAME REPO DPKG_ARCH TARGET_ARCH DPKG_BASENAME LATEST_VER DPKG_VERSION)
+    RET="$1"
+    shift
+
+    if [[ $# -gt 0 ]]; then
+        VARS_TO_SUBST=("$@")
+    fi
+
+    local max_loops=5
+    local _count=0
+    while [[ "$RET" == *'$'* && $_count -lt $max_loops ]]; do
+        for var in "${VARS_TO_SUBST[@]}"; do
+            if [[ -n "${!var+x}" ]]; then
+                #echo "Substituting variable [$_count] $var - ${!var}"
+                val="${!var}"  # Indirect expansion to get value of the variable
+                RET="${RET//\$$var/$val}"
+            fi
+        done
+        _count=$(( _count + 1 ))
+    done
+    echo "$RET"
+}
+

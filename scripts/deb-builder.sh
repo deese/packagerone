@@ -1,15 +1,10 @@
 #!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
 source $CDIR/environ.sh
-source $CDIR/rpm-builder.sh
-source $CDIR/deb-builder.sh
 
 # Common package building functions
-build_package() {
-    local config_file="$1"
-
-    # Source the configuration
-    source "$config_file"
+build_deb () {
+    mkdir -p $OUTPUT_FOLDER/deb
 
     # Validate required variables
     if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
@@ -26,19 +21,22 @@ build_package() {
 
     # Check if already up to date
     CURRENT_VERSION=$(get_stored_version "$REPO")
-    if [[ $FORCE -ne 1 && "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
+    if [[ "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
         echo "[INFO] $REPO is up to date ($CURRENT_VERSION)"
         return 0
     fi
-
 
     # Setup package variables
     DPKG_VERSION="${LATEST_VER#v}"
     DPKG_DIR="${DPKG_BASENAME}-${LATEST_VER}-${TARGET_ARCH}"
     DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
-    DPKG_PATH="./$OUTPUT_FOLDER/$DPKG_NAME"
-    PACKAGE_VERSION=$DPKG_VERSION
+    DPKG_PATH="./$OUTPUT_FOLDER/deb/$DPKG_NAME"
 
+    # Check if package already exists
+    if [ -f "$DPKG_PATH" ]; then
+        echo "File already exists: $DPKG_PATH"
+        return 0
+    fi
     # Download file
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
@@ -55,17 +53,28 @@ build_package() {
         $EXTRACT_CMD "$DOWNLOAD_FILENAME"
     fi
 
-    ### Until here is generic.
-    SKIP_DEB_PACKAGE=1
-    SKIP_RPM_PACKAGE=0
+    # Install files
+    for entry in "${INSTALL_FILES[@]}"; do
+        IFS='|' read -r source perms destination <<< "$entry"
+        source=$(var_substitution "$source")
+        install -Dm"$perms" "$source" "${DPKG_DIR}$destination"
+    done
 
-    if [ $SKIP_DEB_PACKAGE -ne 1 ]; then
-        build_deb
-    fi 
+    # Create DEBIAN directory and control file
+    mkdir -p "${DPKG_DIR}/DEBIAN"
+    cat >"${DPKG_DIR}/DEBIAN/control" <<EOF
+Package: ${DPKG_BASENAME}
+Version: ${DPKG_VERSION}
+Section: utils
+Priority: optional
+Maintainer: ${MAINTAINER}
+Homepage: https://github.com/${REPO}
+Architecture: ${DPKG_ARCH}
+Description: ${PACKAGE_DESCRIPTION}
+EOF
 
-    if [[ ! -z "$SKIP_RPM_PACKAGE" && $SKIP_RPM_PACKAGE -ne 1 ]]; then
-        build_rpm
-    fi
+    # Build package
+    fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}"
 
     # Cleanup
     if [[ -n "$CLEANUP_FILES" ]]; then
