@@ -16,6 +16,16 @@ packages=(
 
 export CHANGES_FILE=$(mktemp --suffix ".changes")
 
+function do_upload {
+    if [ ! -z "$PKG1UPLOADER" ]; then
+      if [ ! -f "./scripts/uploader_$PKG1UPLOADER.sh" ]; then
+        echo "uploader_$PKG1UPLOADER.sh doesn't exit"
+        exit
+      fi
+      echo "Running uploader - $PKG1UPLOADER"
+      bash ./scripts/uploader_$PKG1UPLOADER.sh
+    fi
+}
 function cleanup {
   if [ -f $CHANGES_FILE ]; then
     rm -f $CHANGES_FILE
@@ -26,8 +36,16 @@ trap cleanup EXIT
 
 read_env
 
-while getopts "fVvh" opt; do
+while getopts "ufVvhF:" opt; do
   case "$opt" in
+    F)
+        if [[ -z "$OPTARG" ]]; then
+            echo "Error: -F requires a github repository name"
+            exit 1
+        fi
+        bash ./scripts/creator/formula_creator.sh "$OPTARG"
+        exit 0
+        ;;
     f)
       FORCE=1
       ;;
@@ -37,6 +55,10 @@ while getopts "fVvh" opt; do
     v)
       VERBOSE=1
       ;;
+    u)
+       do_upload
+       exit 0
+       ;; 
     *)
       echo "Usage: $0 [-V] [-v] [-f]"
       exit 1
@@ -61,13 +83,6 @@ done
 exit 0
 
 if [ -s $CHANGES_FILE ]; then
-	if [ ! -z "$PKG1UPLOADER" ]; then
-	  if [ ! -f "./scripts/uploader_$PKG1UPLOADER.sh" ]; then
-	    echo "uploader_$PKG1UPLOADER.sh doesn't exit"
-	    exit
-	  fi
-	  echo "Running uploader - $PKG1UPLOADER"
-	  bash ./scripts/uploader_$PKG1UPLOADER.sh
-	fi
+    do_upload
 fi
 

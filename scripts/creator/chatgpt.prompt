@@ -1,0 +1,81 @@
+I have a tool that generates packages based on template files. I want you to help me to creating new templates.
+
+### START OF EXAMPLE 1 ###
+Download url:
+https://github.com/eza-community/eza/releases/download/v0.21.4/eza_x86_64-unknown-linux-gnu.tar.gz
+
+File listing:
+$ tar tvf eza_x86_64-unknown-linux-gnu.tar.gz
+-rwxr-xr-x ces/users   2282480 2025-05-30 16:04 ./eza
+
+Output Template:
+# -*- mode: sh -*-
+REPO="eza-community/eza"
+DPKG_BASENAME="eza"
+DOWNLOAD_FILENAME="eza_\$TARGET_ARCH-unknown-linux-gnu.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+    "eza|755|/usr/bin/eza"
+)
+CLEANUP_FILES="eza"
+PACKAGE_DESCRIPTION="eza is a modern alternative for the venerable file-listing command-line program ls that
+  ships with Unix and Linux operating systems, giving it more features and better defaults.
+  It uses colours to distinguish file types and metadata. It knows about symlinks,
+  extended attributes, and Git. And it's small, fast, and just one single binary."
+
+PACKAGE_SUMMARY="eza is a modern alternative for ls"
+PACKAGE_LICENSE="MIT"
+
+
+### END OF EXAMPLE 1 ###
+### START OF EXAMPLE 2 ###
+Download url:
+https://github.com/junegunn/fzf/releases/download/v0.62.0/fzf-0.62.0-linux_amd64.tar.gz
+
+
+File listing:
+tar tvf fzf-0.62.0-linux_amd64.tar.gz
+-rwxr-xr-x jg/staff    3883008 2025-05-04 11:59 fzf-0.62.0-linux_amd64/fzf
+-rw-r--r-- jg/staff    3883008 2025-05-04 11:59 fzf-0.62.0-linux_amd64/extra/fzf.extra
+
+
+Output template:
+
+REPO="junegunn/fzf"
+DPKG_BASENAME="fzf"
+DOWNLOAD_FILENAME="fzf-\$DPKG_VERSION-linux_\$DPKG_ARCH.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+    "fzf|755|/usr/bin/fzf"
+    "extra/fzf.extra|644|/usr/share/fzf/extra/fzf.extra"
+    )
+CLEANUP_FILES="fzf extra/fzf.extra extra"
+PACKAGE_DESCRIPTION="fzf is a general-purpose command-line fuzzy finder.
+  It's an interactive filter program for any kind of list; files, command history, processes, hostnames, bookmarks,
+    git commits, etc. It implements a \"fuzzy\" matching algorithm, so you can quickly type in patterns with omitted
+      characters and still get the results you want."
+      
+
+### END OF EXAMPLE 2 ###
+
+Given the examples above, can you create the output template for the package with the following criteria:
+
+Download url:
+$DOWNLOAD_LINK
+
+File listing:
+$FILELIST
+
+When creating the INSTALL_FILES list, remove the base directory at the beginning of each item. In the examples, the directory to remove are  "./" and "fzf-0.62.0-linux_amd64".
+Add all files. Binary files should be in /usr/bin and the rest should be in /usr/share/packagename/. 
+In the CLEANUP_FILES you should add all the files and folders that are added to INSTALL_FILES. In the example the CLEANUP_FILES will be "eza" in one case and "fzf extra/fzf.extra" in another one. 
+Return only the template without any comments, unless you are not able to create the template. If you are not able to do it, please explain why.
+
+There are a few available variables that are: 
+LATEST_VER=x.x.x The latest version retrieved for that package
+TARGET_ARCH=x86_64
+DPKG_ARCH=amd64
+DPKG_VERSION="\${LATEST_VER#v}"
+
