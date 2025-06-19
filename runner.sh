@@ -1,9 +1,11 @@
 #!/bin/bash
 set -e
-source scripts/environ.sh
-source scripts/pkg-common.sh
-source scripts/deb-updater.sh
-source scripts/rpm-builder.sh
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
+source $SCRIPT_DIR/scripts/environ.sh
+source $SCRIPT_DIR/scripts/pkg-common.sh
+source $SCRIPT_DIR/scripts/deb-updater.sh
+source $SCRIPT_DIR/scripts/rpm-builder.sh
+
 
 packages=(
 #  "ajeetdsouza/zoxide|zoxide_\$VERSION-1_amd64.deb"
@@ -18,12 +20,12 @@ export CHANGES_FILE=$(mktemp --suffix ".changes")
 
 function do_upload {
     if [ ! -z "$PKG1UPLOADER" ]; then
-      if [ ! -f "./scripts/uploader_$PKG1UPLOADER.sh" ]; then
+      if [ ! -f "$SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh" ]; then
         echo "uploader_$PKG1UPLOADER.sh doesn't exit"
         exit
       fi
       echo "Running uploader - $PKG1UPLOADER"
-      bash ./scripts/uploader_$PKG1UPLOADER.sh
+      bash $SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh
     fi
 }
 function cleanup {
@@ -36,14 +38,14 @@ trap cleanup EXIT
 
 read_env
 
-while getopts "ufVvhF:" opt; do
+while getopts "ufVvhF:RD" opt; do
   case "$opt" in
     F)
         if [[ -z "$OPTARG" ]]; then
             echo "Error: -F requires a github repository name"
             exit 1
         fi
-        bash ./scripts/creator/formula_creator.sh "$OPTARG"
+        bash $SCRIPT_DIR/scripts/creator/formula_creator.sh "$OPTARG"
         exit 0
         ;;
     f)
@@ -58,17 +60,24 @@ while getopts "ufVvhF:" opt; do
     u)
        do_upload
        exit 0
-       ;; 
+       ;;
+    R)
+      SKIP_RPM_PACKAGE=1
+      ;;
+    D)
+      SKIP_DEB_PACKAGE=1
+      ;;
     *)
-      echo "Usage: $0 [-V] [-v] [-f]"
+      echo "Usage: $0 [-V] [-v] [-f] [-R] [-D]"
       exit 1
       ;;
   esac
 done
+done
 
 if [[ $check_versions -eq 1 ]]; then
   echo "Checking versions..."
-  bash ./scripts/version_check.sh
+  bash $SCRIPT_DIR/scripts/version_check.sh
   exit 1
 fi
 
@@ -76,7 +85,7 @@ fi
 #  process_deb_file "$entry"
 #done
 echo $FORCE
-for i in formulas/*.formula; do
+for i in $SCRIPT_DIR/formulas/*.formula; do
   build_package $i
 done
 

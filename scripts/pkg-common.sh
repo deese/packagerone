@@ -42,7 +42,7 @@ build_package() {
     # Download file
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
-    
+
     $WGET "$DOWNLOAD_URL" -O  $BUILD_FOLDER/$DOWNLOAD_FILENAME
 
     if [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
@@ -52,18 +52,18 @@ build_package() {
 
     # Extract if needed
     if [[ -n "$EXTRACT_CMD" ]]; then
-        $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
+        if [[ "$EXTRACT_CMD" == *"tar"* ]]; then
+            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER"
+        else
+            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
+        fi
     fi
 
-    ### Until here is generic.
-    SKIP_DEB_PACKAGE=0
-    SKIP_RPM_PACKAGE=1
-
-    if [ $SKIP_DEB_PACKAGE -ne 1 ]; then
+    if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
         build_deb
-    fi 
+    fi
 
-    if [[ ! -z "$SKIP_RPM_PACKAGE" && $SKIP_RPM_PACKAGE -ne 1 ]]; then
+    if [ ${SKIP_RPM_PACKAGE:-0} -ne 1 ]; then
         build_rpm
     fi
 
@@ -77,5 +77,5 @@ build_package() {
     set_stored_version "$REPO" "$LATEST_VER"
     echo "[SUCCESS] Built $DPKG_PATH"
     echo 1 > "$CHANGES_FILE"
-    return 0 
+    return 0
 }

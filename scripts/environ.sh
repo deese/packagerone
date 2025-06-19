@@ -3,13 +3,12 @@ MAINTAINER="Deese <deese2k@gmail.com>"
 DPKG_ARCH="amd64"
 TARGET_ARCH="x86_64"
 WGET="wget -q"
-OUTPUT_FOLDER="dist"
-BUILD_FOLDER="build"
-PKG1UPLOADTRK=".upload_tracker"
+OUTPUT_FOLDER="$SCRIPT_DIR/dist"
+BUILD_FOLDER="$SCRIPT_DIR/build"
+PKG1UPLOADTRK="$SCRIPT_DIR/.upload_tracker"
 DB_FILE="$SCRIPT_DIR/versions.db"
 
-mkdir -p $OUTPUT_FOLDER
-mkdir -p $BUILD_FOLDER
+mkdir -p $OUTPUT_FOLDER $BUILD_FOLDER
 
 function read_env() {
   local filePath="${1:-.env}"
