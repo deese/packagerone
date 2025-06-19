@@ -42,22 +42,22 @@ build_package() {
     # Download file
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
+    
+    $WGET "$DOWNLOAD_URL" -O  $BUILD_FOLDER/$DOWNLOAD_FILENAME
 
-    $WGET "$DOWNLOAD_URL"
-
-    if [ ! -f "$DOWNLOAD_FILENAME" ]; then
+    if [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
         echo "Error downloading file: $DOWNLOAD_URL"
         return  1
     fi
 
     # Extract if needed
     if [[ -n "$EXTRACT_CMD" ]]; then
-        $EXTRACT_CMD "$DOWNLOAD_FILENAME"
+        $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
     fi
 
     ### Until here is generic.
-    SKIP_DEB_PACKAGE=1
-    SKIP_RPM_PACKAGE=0
+    SKIP_DEB_PACKAGE=0
+    SKIP_RPM_PACKAGE=1
 
     if [ $SKIP_DEB_PACKAGE -ne 1 ]; then
         build_deb

@@ -48,8 +48,8 @@ DOWNLOAD_FILENAME="fzf-\$DPKG_VERSION-linux_\$DPKG_ARCH.tar.gz"
 DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
 EXTRACT_CMD="tar zxf"
 INSTALL_FILES=(
-    "fzf|755|/usr/bin/fzf"
-    "extra/fzf.extra|644|/usr/share/fzf/extra/fzf.extra"
+    "fzf-0.62.0-linux_amd64/fzf|755|/usr/bin/fzf"
+    "fzf-0.62.0-linux_amd64/extra/fzf.extra|644|/usr/share/fzf/extra/fzf.extra"
     )
 CLEANUP_FILES="fzf extra/fzf.extra extra"
 PACKAGE_DESCRIPTION="fzf is a general-purpose command-line fuzzy finder.
@@ -68,7 +68,6 @@ $DOWNLOAD_LINK
 File listing:
 $FILELIST
 
-When creating the INSTALL_FILES list, remove the base directory at the beginning of each item. In the examples, the directory to remove are  "./" and "fzf-0.62.0-linux_amd64".
 Add all files. Binary files should be in /usr/bin and the rest should be in /usr/share/packagename/. 
 In the CLEANUP_FILES you should add all the files and folders that are added to INSTALL_FILES. In the example the CLEANUP_FILES will be "eza" in one case and "fzf extra/fzf.extra" in another one. 
 Return only the template without any comments, unless you are not able to create the template. If you are not able to do it, please explain why.

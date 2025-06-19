@@ -41,7 +41,9 @@ build_deb () {
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
 
-    $WGET "$DOWNLOAD_URL"
+    if [ ! -f $DOWNLOAD_FILENAME ]; then
+        $WGET "$DOWNLOAD_URL"
+    fi
 
     if [ ! -f "$DOWNLOAD_FILENAME" ]; then
         echo "Error downloading file: $DOWNLOAD_URL"
