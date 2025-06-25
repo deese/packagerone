@@ -1,7 +1,9 @@
 #!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
-LATEST_FILE="latest.json"
-DOWNLOAD_LINKS="links.txt"
+TMPFOLDER=$(mktemp -dt "pkgone-XXXXXXXX")
+WGET="wget -q"
+LATEST_FILE="$TMPFOLDER/latest.json"
+DOWNLOAD_LINKS="$TMPFOLDER/links.txt"
 OUTPUT_GPT="output_gpt.log"
 
 function run_clean {
@@ -10,7 +12,7 @@ function run_clean {
 	case "$answer" in
 		[Yy]* )
 			echo "Deleting file..."
-			rm -f "$LATEST_FILE" "$DOWNLOAD_LINKS" "$FILENAME" "$OUTPUT_GPT"
+			rm -fr "$TMPFOLDER" # "$LATEST_FILE" "$DOWNLOAD_LINKS" "$FILENAME" "$OUTPUT_GPT"
 			;;
 		* )
 			echo "File not deleted."
@@ -30,9 +32,9 @@ function var_substitution {
     stderr "substituting.."
     while [[ "$RET" == *'$'* && $_count -lt $max_loops ]]; do
         for var in "${VARS_TO_SUBST[@]}"; do
-            stderr "echking $var"
+            #stderr "echking $var"
             if [[ -n "${!var+x}" ]]; then
-                stderr "Substituting variable [$_count] $var - ${!var}"
+                #stderr "Substituting variable [$_count] $var - ${!var}"
                 val="${!var}"  # Indirect expansion to get value of the variable
                 RET="${RET//\$$var/$val}"
             fi
@@ -70,7 +72,7 @@ function query_ai {
 }
 
 function download_latest_gh {
-    stderr "Downloading lates from: $1"
+    stderr "Downloading latest from: $1"
 	if [ -f "$LATEST_FILE" ]; then
 		stderr "Data already exists."
 		return 0
@@ -89,6 +91,7 @@ function download_latest_gh {
 
 function get_download_links {
     stderr "Retrieving links"
+
     jq -r '.assets[] | select(.name | test("(?=.*linux)(?=.*x86_64).*")) | .browser_download_url' $LATEST_FILE > $DOWNLOAD_LINKS
     jq -r '.assets[] | select(.name | test("(?=.*linux)(?=.*amd64).*")) | .browser_download_url' $LATEST_FILE >> $DOWNLOAD_LINKS
 
@@ -114,9 +117,11 @@ function get_repo_data {
     stderr "Get Repo Data"
     download_latest_gh "$1"
     get_download_links
+    
 
     PROMPT_LINKS="$(<$DOWNLOAD_LINKS)"
     if [[ $(echo -e "$PROMPT_LINKS"|wc -l) -eq 1 ]]; then
+        stderr "Only one link found."
         echo "$PROMPT_LINKS"
         return 0
         #stderr "Only one found"
@@ -131,8 +136,9 @@ function get_repo_data {
 
 function get_file_listing {
     FILENAME=$(basename "$DOWNLOAD_LINK")
+    FILENAME="$TMPFOLDER/$FILENAME"
     if [ ! -f $FILENAME ]; then 
-        wget $DOWNLOAD_LINK -O $FILENAME
+        $WGET $DOWNLOAD_LINK -O $FILENAME
     fi
 
     if [ ! -f $FILENAME ]; then

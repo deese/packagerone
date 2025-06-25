@@ -71,6 +71,7 @@ $FILELIST
 Add all files. Binary files should be in /usr/bin and the rest should be in /usr/share/packagename/. 
 In the CLEANUP_FILES you should add all the files and folders that are added to INSTALL_FILES. In the example the CLEANUP_FILES will be "eza" in one case and "fzf extra/fzf.extra" in another one. 
 Return only the template without any comments, unless you are not able to create the template. If you are not able to do it, please explain why.
+When building the DOWNLOAD_FILENAME variable, use $LATEST_VER if the version starts with a 'v' (example: v0.4.2) and use $DPKG_VERSION if the version is just a version number (example: 0.4.2). 
 
 There are a few available variables that are: 
 LATEST_VER=x.x.x The latest version retrieved for that package

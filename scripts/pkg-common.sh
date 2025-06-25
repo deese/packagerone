@@ -50,8 +50,8 @@ build_package() {
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
 
-    logme "Downloading file: $DOWNLOAD_URL" 1
-    $WGET "$DOWNLOAD_URL" -O  $BUILD_FOLDER/$DOWNLOAD_FILENAME
+    logme "Downloading file1: $DOWNLOAD_URL" 1
+    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
 
     if [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
         logme "Error downloading file: $DOWNLOAD_URL" 
@@ -59,6 +59,8 @@ build_package() {
     fi
 
     # Extract if needed
+    logme "Extracting file"
+
     if [[ -n "$EXTRACT_CMD" ]]; then
         if [[ "$EXTRACT_CMD" == *"tar"* ]]; then
             $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER"
@@ -67,10 +69,12 @@ build_package() {
         fi
     fi
 
+    logme "File extracted. Running builders"
+
     if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
         build_deb
     fi
-
+    
     if [ ${SKIP_RPM_PACKAGE:-0} -ne 1 ]; then
         build_rpm
     fi

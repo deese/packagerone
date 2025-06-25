@@ -43,8 +43,17 @@ trap cleanup EXIT
 
 read_env
 
-while getopts "ufVvhF:RD" opt; do
+while getopts "ufVvhF:b:RD" opt; do
   case "$opt" in
+    b) 
+        if [[ -z "$OPTARG" ]]; then
+            echo "Error: -b requires a formula"
+            exit 1
+        fi
+	    build_package "$OPTARG"
+        exit 0
+		;;
+
     F)
         if [[ -z "$OPTARG" ]]; then
             echo "Error: -F requires a github repository name"
@@ -55,12 +64,6 @@ while getopts "ufVvhF:RD" opt; do
         ;;
     f)
       FORCE=1
-      ;;
-    R)
-      SKIP_RPM_PACKAGE=1
-      ;;
-    D)
-      SKIP_DEB_PACKAGE=1
       ;;
     V)
       check_versions=1
@@ -80,6 +83,16 @@ while getopts "ufVvhF:RD" opt; do
       ;;
     *)
       echo "Usage: $0 [-V] [-v] [-f] [-R] [-D]"
+      echo "-----"
+	  echo "-b - Build specific formula"
+      echo "-D - Skip DEB package creation"
+      echo "-f - force build without checking versions"
+      echo "-F <repository/name> - Automatically create formulas using AI (this requires human review)"
+      echo "-R - Skip RPM package creation"
+      echo "-u - Upload created packages"
+      echo "-v - Enable verbose mode"
+      echo "-V - Run version check and exit."
+      echo "---------------"
       exit 1
       ;;
   esac
