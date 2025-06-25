@@ -11,4 +11,5 @@ LOGFOLDER="$SCRIPT_DIR/logs"
 RUNLOG="$LOGFOLDER/$(date +"%Y%m%d%H%M%S-pkgone.log")"
 VERBOSE=0
 
+
 mkdir -p $OUTPUT_FOLDER $LOGFOLDER

@@ -1,5 +1,5 @@
 SCRIPT_DIR=$(dirname "$(realpath "$0")")
-source "$SCRIPT_DIR/scripts/environ.sh"
+source "scripts/environ.sh"
 
 mkdir -p $OUTPUT_FOLDER $LOGFOLDER
 

@@ -1,3 +1,4 @@
+
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
 source "$CDIR/functions.sh"
 
@@ -25,8 +26,7 @@ function upload {
         echo The variables \$BK_TOKEN, \$BK_ORG and \$BK_REGISTRY_DEB must be set. Exiting
 		exit
 	fi
-	echo Uploading to BuildKite
-		
+
 	for i in $OUTPUT_FOLDER/deb/*; do 
 		upload_file "$i" "$BK_REGISTRY_DEB"
 	done
@@ -61,5 +61,7 @@ PACKAGES=$(curl -H "Authorization: Bearer $BK_TOKEN" \
 
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     echo "Manual task - Running uploads"
+    OUTPUT_FOLDER="$PWD/dist"
+    PKG1UPLOADTRK="$PWD/$(basename $PKG1UPLOADTRK)"
     upload
 fi
