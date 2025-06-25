@@ -51,7 +51,6 @@ build_package() {
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
 
     logme "Downloading file: $DOWNLOAD_URL" 1
-
     $WGET "$DOWNLOAD_URL" -O  $BUILD_FOLDER/$DOWNLOAD_FILENAME
 
     if [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then

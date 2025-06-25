@@ -20,12 +20,13 @@ export CHANGES_FILE=$(mktemp --suffix ".changes")
 
 function do_upload {
     if [ ! -z "$PKG1UPLOADER" ]; then
-      if [ ! -f "./scripts/uploader_$PKG1UPLOADER.sh" ]; then
+      if [ ! -f "$SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh" ]; then
         logme "uploader_$PKG1UPLOADER.sh doesn't exit"
+        echo "uploader_$PKG1UPLOADER.sh doesn't exit"
         exit
       fi
       logme "Running uploader - $PKG1UPLOADER"
-      bash ./scripts/uploader_$PKG1UPLOADER.sh
+      bash $SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh
     fi
 }
 function cleanup {
@@ -49,7 +50,7 @@ while getopts "ufVvhF:RD" opt; do
             echo "Error: -F requires a github repository name"
             exit 1
         fi
-        bash ./scripts/creator/formula_creator.sh "$OPTARG"
+        bash $SCRIPT_DIR/scripts/creator/formula_creator.sh "$OPTARG"
         exit 0
         ;;
     f)
@@ -70,9 +71,15 @@ while getopts "ufVvhF:RD" opt; do
     u)
        do_upload
        exit 0
-       ;; 
+       ;;
+    R)
+      SKIP_RPM_PACKAGE=1
+      ;;
+    D)
+      SKIP_DEB_PACKAGE=1
+      ;;
     *)
-      echo "Usage: $0 [-V] [-v] [-f]"
+      echo "Usage: $0 [-V] [-v] [-f] [-R] [-D]"
       exit 1
       ;;
   esac
@@ -80,11 +87,11 @@ done
 
 if [[ $check_versions -eq 1 ]]; then
   echo "Checking versions..."
-  bash ./scripts/version_check.sh
+  bash $SCRIPT_DIR/scripts/version_check.sh
   exit 1
 fi
 
-for i in formulas/*.formula; do
+for i in $SCRIPT_DIR/formulas/*.formula; do
   build_package $i
 done
 

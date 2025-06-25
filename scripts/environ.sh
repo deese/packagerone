@@ -4,6 +4,7 @@ DPKG_ARCH="amd64"
 TARGET_ARCH="x86_64"
 WGET="wget -q"
 OUTPUT_FOLDER="$SCRIPT_DIR/dist"
+BUILD_FOLDER="$SCRIPT_DIR/build"
 PKG1UPLOADTRK="$SCRIPT_DIR/.upload_tracker"
 DB_FILE="$SCRIPT_DIR/versions.db"
 LOGFOLDER="$SCRIPT_DIR/logs"
@@ -11,4 +12,3 @@ RUNLOG="$LOGFOLDER/$(date +"%Y%m%d%H%M%S-pkgone.log")"
 VERBOSE=0
 
 mkdir -p $OUTPUT_FOLDER $LOGFOLDER
-
