@@ -3,5 +3,6 @@
 *.tst.*
 *.db
 dist/
+logs/
 .upload_tracker
 .aider*

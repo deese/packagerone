@@ -1,8 +1,8 @@
 #!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
-source $CDIR/environ.sh
-source $CDIR/rpm-builder.sh
-source $CDIR/deb-builder.sh
+source "$CDIR/functions.sh"
+source "$CDIR/rpm-builder.sh"
+source "$CDIR/deb-builder.sh"
 
 # Common package building functions
 build_package() {
@@ -10,6 +10,8 @@ build_package() {
 
     # Source the configuration
     source "$config_file"
+    
+    logme "[PKGBUILD] Building package with formula: $1"
 
     # Validate required variables
     if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
@@ -30,7 +32,12 @@ build_package() {
         echo "[INFO] $REPO is up to date ($CURRENT_VERSION)"
         return 0
     fi
-
+    
+    if [ ! -n "$_TMPFOLDER" ]; then
+        _TMPFOLDER=$(mktemp -dt "pkgone-XXXXXXXX")
+        BUILD_FOLDER="$_TMPFOLDER/build"
+        mkdir -p $BUILD_FOLDER
+    fi
 
     # Setup package variables
     DPKG_VERSION="${LATEST_VER#v}"
@@ -42,40 +49,44 @@ build_package() {
     # Download file
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
-    
+
+    logme "Downloading file: $DOWNLOAD_URL" 1
+
     $WGET "$DOWNLOAD_URL" -O  $BUILD_FOLDER/$DOWNLOAD_FILENAME
 
     if [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
-        echo "Error downloading file: $DOWNLOAD_URL"
+        logme "Error downloading file: $DOWNLOAD_URL" 
         return  1
     fi
 
     # Extract if needed
     if [[ -n "$EXTRACT_CMD" ]]; then
-        $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
+        if [[ "$EXTRACT_CMD" == *"tar"* ]]; then
+            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER"
+        else
+            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
+        fi
     fi
 
-    ### Until here is generic.
-    SKIP_DEB_PACKAGE=0
-    SKIP_RPM_PACKAGE=1
-
-    if [ $SKIP_DEB_PACKAGE -ne 1 ]; then
+    if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
         build_deb
-    fi 
+    fi
 
-    if [[ ! -z "$SKIP_RPM_PACKAGE" && $SKIP_RPM_PACKAGE -ne 1 ]]; then
+    if [ ${SKIP_RPM_PACKAGE:-0} -ne 1 ]; then
         build_rpm
     fi
 
     # Cleanup
     if [[ -n "$CLEANUP_FILES" ]]; then
+        logme "Cleaning up files." 1
         rm -fr $CLEANUP_FILES
     fi
+
     rm -fr "${DPKG_DIR}" "$DOWNLOAD_FILENAME"
 
     # Update version tracking
     set_stored_version "$REPO" "$LATEST_VER"
-    echo "[SUCCESS] Built $DPKG_PATH"
+    logme "[SUCCESS] Built $DPKG_BASENAME"
     echo 1 > "$CHANGES_FILE"
-    return 0 
+    return 0
 }

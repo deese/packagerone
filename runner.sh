@@ -1,9 +1,11 @@
 #!/bin/bash
+SCRIPT_DIR=$(dirname "$(realpath "$0")")
 set -e
-source scripts/environ.sh
-source scripts/pkg-common.sh
-source scripts/deb-updater.sh
-source scripts/rpm-builder.sh
+
+source "$SCRIPT_DIR/scripts/functions.sh"
+source "$SCRIPT_DIR/scripts/pkg-common.sh"
+source "$SCRIPT_DIR/scripts/deb-updater.sh"
+source "$SCRIPT_DIR/scripts/rpm-builder.sh"
 
 packages=(
 #  "ajeetdsouza/zoxide|zoxide_\$VERSION-1_amd64.deb"
@@ -19,10 +21,10 @@ export CHANGES_FILE=$(mktemp --suffix ".changes")
 function do_upload {
     if [ ! -z "$PKG1UPLOADER" ]; then
       if [ ! -f "./scripts/uploader_$PKG1UPLOADER.sh" ]; then
-        echo "uploader_$PKG1UPLOADER.sh doesn't exit"
+        logme "uploader_$PKG1UPLOADER.sh doesn't exit"
         exit
       fi
-      echo "Running uploader - $PKG1UPLOADER"
+      logme "Running uploader - $PKG1UPLOADER"
       bash ./scripts/uploader_$PKG1UPLOADER.sh
     fi
 }
@@ -30,13 +32,17 @@ function cleanup {
   if [ -f $CHANGES_FILE ]; then
     rm -f $CHANGES_FILE
   fi
+  if [ -f "$BUILD_FOLDER" ]; then 
+    logme "Removing build folder: $BUILD_FOLDER" 1 
+    rm -fr "$BUILD_FOLDER"
+  fi
   unset CHANGES_FILE
 }
 trap cleanup EXIT
 
 read_env
 
-while getopts "ufVvhF:" opt; do
+while getopts "ufVvhF:RD" opt; do
   case "$opt" in
     F)
         if [[ -z "$OPTARG" ]]; then
@@ -48,6 +54,12 @@ while getopts "ufVvhF:" opt; do
         ;;
     f)
       FORCE=1
+      ;;
+    R)
+      SKIP_RPM_PACKAGE=1
+      ;;
+    D)
+      SKIP_DEB_PACKAGE=1
       ;;
     V)
       check_versions=1
@@ -72,10 +84,6 @@ if [[ $check_versions -eq 1 ]]; then
   exit 1
 fi
 
-#for entry in "${packages[@]}"; do
-#  process_deb_file "$entry"
-#done
-echo $FORCE
 for i in formulas/*.formula; do
   build_package $i
 done

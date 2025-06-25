@@ -1,6 +1,6 @@
 #!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
-source $CDIR/environ.sh
+source "$CDIR/functions.sh"
 
 # Common package building functions
 build_deb () {
@@ -19,30 +19,24 @@ build_deb () {
         exit 1
     fi
 
-    # Check if already up to date
-    CURRENT_VERSION=$(get_stored_version "$REPO")
-    if [[ "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
-        echo "[INFO] $REPO is up to date ($CURRENT_VERSION)"
-        return 0
-    fi
-
     # Setup package variables
     DPKG_VERSION="${LATEST_VER#v}"
-    DPKG_DIR="${DPKG_BASENAME}-${LATEST_VER}-${TARGET_ARCH}"
+    DPKG_DIR="$BUILD_FOLDER/${DPKG_BASENAME}-${LATEST_VER}-${TARGET_ARCH}"
     DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
-    DPKG_PATH="./$OUTPUT_FOLDER/deb/$DPKG_NAME"
+    DPKG_PATH="$OUTPUT_FOLDER/deb/$DPKG_NAME"
 
+    logme "Building $DPKG_BASENAME deb package"
     # Check if package already exists
     if [ -f "$DPKG_PATH" ]; then
         echo "File already exists: $DPKG_PATH"
         return 0
     fi
     # Download file
-    DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
+    DOWNLOAD_FILENAME="$BUILD_FOLDER/$(var_substitution "$DOWNLOAD_FILENAME")"
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
 
     if [ ! -f $DOWNLOAD_FILENAME ]; then
-        $WGET "$DOWNLOAD_URL"
+        $WGET "$DOWNLOAD_URL" -O "$DOWNLOAD_FILENAME"
     fi
 
     if [ ! -f "$DOWNLOAD_FILENAME" ]; then
@@ -64,6 +58,8 @@ build_deb () {
 
     # Create DEBIAN directory and control file
     mkdir -p "${DPKG_DIR}/DEBIAN"
+    _DESC=$(echo -e "$PACKAGE_DESCRIPTION" | sed '2,$s/^/\t/')
+    
     cat >"${DPKG_DIR}/DEBIAN/control" <<EOF
 Package: ${DPKG_BASENAME}
 Version: ${DPKG_VERSION}
@@ -72,7 +68,7 @@ Priority: optional
 Maintainer: ${MAINTAINER}
 Homepage: https://github.com/${REPO}
 Architecture: ${DPKG_ARCH}
-Description: ${PACKAGE_DESCRIPTION}
+Description: $_DESC
 EOF
 
     # Build package
