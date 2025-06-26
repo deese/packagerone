@@ -1,0 +1,22 @@
+# -*- mode: sh -*-
+REPO="sharkdp/fd"
+DPKG_BASENAME="fd"
+DOWNLOAD_FILENAME="fd-\$LATEST_VER-x86_64-unknown-linux-gnu.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/fd|755|/usr/bin/fd"
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/CHANGELOG.md|644|/usr/share/fd/CHANGELOG.md"
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/LICENSE-APACHE|644|/usr/share/fd/LICENSE-APACHE"
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/LICENSE-MIT|644|/usr/share/fd/LICENSE-MIT"
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/README.md|644|/usr/share/fd/README.md"
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/autocomplete/fd.fish|644|/usr/share/fd/autocomplete/fd.fish"
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/autocomplete/_fd|644|/usr/share/fd/autocomplete/_fd"
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/autocomplete/fd.ps1|644|/usr/share/fd/autocomplete/fd.ps1"
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/autocomplete/fd.bash|644|/usr/share/fd/autocomplete/fd.bash"
+ "fd-v10.2.0-x86_64-unknown-linux-gnu/fd.1|644|/usr/share/fd/fd.1"
+)
+CLEANUP_FILES="fd-v10.2.0-x86_64-unknown-linux-gnu"
+PACKAGE_DESCRIPTION="fd is a simple, fast and user-friendly alternative to 'find'. It provides a simple syntax to find files and directories, and the results are color-coded for easier differentiation. Its minimal design helps integrate seamlessly into shell pipelines."
+PACKAGE_SUMMARY="fd is a simple, fast and user-friendly alternative to 'find'"
+PACKAGE_LICENSE="Apache-2.0 / MIT"

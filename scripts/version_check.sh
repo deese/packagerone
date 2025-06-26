@@ -1,6 +1,6 @@
 #!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
-source $CDIR/environ.sh
+source $CDIR/functions.sh
 
 shopt -s nullglob
 set -e

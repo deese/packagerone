@@ -98,6 +98,7 @@ function var_substitution() {
                 #echo "Substituting variable [$_count] $var - ${!var}"
                 val="${!var}"  # Indirect expansion to get value of the variable
                 RET="${RET//\$$var/$val}"
+                RET="${RET//\$\{$var\}/$val}"
             fi
         done
         _count=$(( _count + 1 ))
