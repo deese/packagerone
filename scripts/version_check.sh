@@ -25,7 +25,7 @@ function get_ver {
             status="(not previously stored)"
         fi
 
-        printf "%-25s %10s %25s %s\n" "$repo" "$ver" "$date_fmt - $day_diff day(s) ago" "$status"
+        printf "%-25s %10s - %10s %5s day(s) ago %s\n" "$repo" "$ver" "$date_fmt" "$day_diff" "$status"
     else
         echo "Version not found for $repo"
     fi
