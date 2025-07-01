@@ -27,7 +27,7 @@ build_deb () {
 
     logme "Building $DPKG_BASENAME deb package"
     # Check if package already exists
-    if [ -f "$DPKG_PATH" ]; then
+    if [ "$FORCE" -eq 0 && -f "$DPKG_PATH" ]; then
         echo "File already exists: $DPKG_PATH"
         return 0
     fi

@@ -8,12 +8,6 @@ source "$SCRIPT_DIR/scripts/deb-updater.sh"
 source "$SCRIPT_DIR/scripts/rpm-builder.sh"
 
 packages=(
-#  "ajeetdsouza/zoxide|zoxide_\$VERSION-1_amd64.deb"
-#  "sharkdp/fd|fd_\$VERSION_amd64.deb"
-#  "sharkdp/bat|bat_\$VERSION_amd64.deb"
-#  "sharkdp/hexyl|hexyl_\$VERSION_amd64.deb"
-#  "burntsushi/ripgrep|ripgrep_\$VERSION-1_amd64.deb"
-#  "dandavison/delta|git-delta_\$VERSION_amd64.deb"
 )
 
 export CHANGES_FILE=$(mktemp --suffix ".changes")
@@ -26,7 +20,7 @@ function do_upload {
         exit
       fi
       logme "Running uploader - $PKG1UPLOADER"
-      bash $SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh
+      bash $SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh $CHANGES_FILE
     fi
 }
 function cleanup {
