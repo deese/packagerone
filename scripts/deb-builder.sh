@@ -31,6 +31,7 @@ build_deb () {
         echo "File already exists: $DPKG_PATH"
         return 0
     fi
+
     # Download file
     DOWNLOAD_FILENAME="$BUILD_FOLDER/$(var_substitution "$DOWNLOAD_FILENAME")"
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
@@ -71,6 +72,14 @@ Architecture: ${DPKG_ARCH}
 Description: $_DESC
 EOF
 
+    ## Clean old files
+
+    OLD_DPKG_NAME="${DPKG_BASENAME}_*_${DPKG_ARCH}.deb"
+    for i in $DPKG_PATH/$OLD_DPKG_NAME; do
+        echo Removing old file: $i
+        rm -f "$i"
+    done
+     
     # Build package
     fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}"
 
