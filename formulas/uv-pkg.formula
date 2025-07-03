@@ -1,0 +1,13 @@
+REPO="astral-sh/uv"
+DPKG_BASENAME="uv"
+DOWNLOAD_FILENAME="uv-\$DPKG_VERSION-x86_64-unknown-linux-gnu.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "uv-x86_64-unknown-linux-gnu/uv|755|/usr/bin/uv"
+ "uv-x86_64-unknown-linux-gnu/uvx|755|/usr/bin/uvx"
+)
+CLEANUP_FILES="uv-x86_64-unknown-linux-gnu/uv uv-x86_64-unknown-linux-gnu/uvx uv-x86_64-unknown-linux-gnu"
+PACKAGE_DESCRIPTION="uv is a fast and minimalist command-line tool for managing your terminal emulator sessions."
+PACKAGE_SUMMARY="uv is a command-line tool for terminal session management"
+PACKAGE_LICENSE="MIT"
