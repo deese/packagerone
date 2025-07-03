@@ -174,14 +174,29 @@ FORMULA=$(echo $DATA | jq -r '.choices[0].text')
 PACKAGE_NAME=$(basename "$1")
 FORMULA_FILE="formulas/${PACKAGE_NAME}-pkg.formula"
 
-# Save the formula to file
-if [ -d "formulas" ]; then
-    echo "$FORMULA" > "$FORMULA_FILE"
-    echo "Formula saved to: $FORMULA_FILE"
-else
-    echo "Error: formulas directory does not exist"
-    exit 1
-fi
+# Show the generated formula to the user
+echo "Generated formula:"
+echo "=================="
+echo "$FORMULA"
+echo "=================="
+
+# Ask user if they want to save the formula
+read -p "Do you want to save this formula to $FORMULA_FILE? [y/N]: " answer
+case "$answer" in
+    [Yy]* )
+        # Save the formula to file
+        if [ -d "formulas" ]; then
+            echo "$FORMULA" > "$FORMULA_FILE"
+            echo "Formula saved to: $FORMULA_FILE"
+        else
+            echo "Error: formulas directory does not exist"
+            exit 1
+        fi
+        ;;
+    * )
+        echo "Formula not saved."
+        ;;
+esac
 
 
 run_clean $DOWNLOAD_LINK
