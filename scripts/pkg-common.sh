@@ -1,17 +1,8 @@
 #!/bin/bash
-
-var_substitution() {
-    VARS_TO_SUBST=(REPO DPKG_ARCH TARGET_ARCH DPKG_BASENAME LATEST_VER DOWNLOAD_FILENAME DPKG_VERSION)
-    RET=$1
-    for var in "${VARS_TO_SUBST[@]}"; do
-        if [[ -n "${!var+x}" ]]; then
-            #echo "Substituting variable: $var"
-            val="${!var}"  # Indirect expansion to get value of the variable
-            RET="${RET//\$$var/$val}"
-        fi
-    done
-    echo "$RET"
-}
+CDIR=$(dirname -- "${BASH_SOURCE[0]}")
+source "$CDIR/functions.sh"
+source "$CDIR/rpm-builder.sh"
+source "$CDIR/deb-builder.sh"
 
 # Common package building functions
 build_package() {
@@ -19,25 +10,33 @@ build_package() {
 
     # Source the configuration
     source "$config_file"
+    
+    logme "[PKGBUILD] Building package with formula: $1"
 
     # Validate required variables
     if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
-        echo "Error: Missing required configuration variables"
+        logme "[PKGBUILD] Error: Missing required configuration variables"
         exit 1
     fi
 
     # Get latest version
     LATEST_VER=$(get_latest_ver "$REPO")
     if [ $? -eq 1 ]; then
-        echo "Fatal error: $LATEST_VER"
+        logme "[PKGBUILD] Fatal error: $LATEST_VER"
         exit 1
     fi
 
     # Check if already up to date
     CURRENT_VERSION=$(get_stored_version "$REPO")
-    if [[ "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
-        echo "[INFO] $REPO is up to date ($CURRENT_VERSION)"
+    if [[ $FORCE -ne 1 && "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
+        logme "[PKGBUILD] $REPO is up to date ($CURRENT_VERSION)"
         return 0
+    fi
+    
+    if [ ! -n "$_TMPFOLDER" ]; then
+        _TMPFOLDER=$(mktemp -dt "pkgone-XXXXXXXX")
+        BUILD_FOLDER="$_TMPFOLDER/build"
+        mkdir -p $BUILD_FOLDER
     fi
 
     # Setup package variables
@@ -45,60 +44,57 @@ build_package() {
     DPKG_DIR="${DPKG_BASENAME}-${LATEST_VER}-${TARGET_ARCH}"
     DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
     DPKG_PATH="./$OUTPUT_FOLDER/$DPKG_NAME"
+    PACKAGE_VERSION=$DPKG_VERSION
 
-    # Check if package already exists
-    if [ -f "$DPKG_PATH" ]; then
-        echo "File already exists: $DPKG_PATH"
-        return 0
-    fi
     # Download file
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
+    logme "[PKGBUILD] Using build folder: $BUILD_FOLDER" 
 
-    $WGET "$DOWNLOAD_URL"
+    logme "[PKGBUILD] Downloading file: $DOWNLOAD_URL" 1
+    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
 
-    if [ ! -f "$DOWNLOAD_FILENAME" ]; then
-        echo "Error downloading file: $DOWNLOAD_URL"
+    if [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
+        logme "[PKGBUILD] Error downloading file: $DOWNLOAD_URL" 
         return  1
+    else 
+        logme "[PKGBUILD] File downloaded to $BUILD_FOLDER/$DOWNLOAD_FILENAME" 1
     fi
 
     # Extract if needed
+    logme "[PKGBUILD] Extracting file"
+
     if [[ -n "$EXTRACT_CMD" ]]; then
-        $EXTRACT_CMD "$DOWNLOAD_FILENAME"
+        if [[ "$EXTRACT_CMD" == *"tar"* ]]; then
+            echo "Extracting to $BUILD_FOLDER" 
+            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER"
+        else
+            echo "Regular extract"
+            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
+        fi
     fi
 
-    # Install files
-    for entry in "${INSTALL_FILES[@]}"; do
-        IFS='|' read -r source perms destination <<< "$entry"
-        source=$(var_substitution "$source")
-        install -Dm"$perms" "$source" "${DPKG_DIR}$destination"
-    done
+    logme "[PKGBUILD] File extracted. Running builders"
 
-    # Create DEBIAN directory and control file
-    mkdir -p "${DPKG_DIR}/DEBIAN"
-    cat >"${DPKG_DIR}/DEBIAN/control" <<EOF
-Package: ${DPKG_BASENAME}
-Version: ${DPKG_VERSION}
-Section: utils
-Priority: optional
-Maintainer: ${MAINTAINER}
-Homepage: https://github.com/${REPO}
-Architecture: ${DPKG_ARCH}
-Description: ${PACKAGE_DESCRIPTION}
-EOF
-
-    # Build package
-    fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}"
+    if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
+        build_deb
+    fi
+    
+    if [ ${SKIP_RPM_PACKAGE:-0} -ne 1 ]; then
+        build_rpm
+    fi
 
     # Cleanup
     if [[ -n "$CLEANUP_FILES" ]]; then
+        logme "[PKGBUILD] Cleaning up files." 1
         rm -fr $CLEANUP_FILES
     fi
+
     rm -fr "${DPKG_DIR}" "$DOWNLOAD_FILENAME"
 
     # Update version tracking
     set_stored_version "$REPO" "$LATEST_VER"
-    echo "[SUCCESS] Built $DPKG_PATH"
+    logme "[SUCCESS] Built $DPKG_BASENAME"
     echo 1 > "$CHANGES_FILE"
-    return 0 
+    return 0
 }

@@ -1,0 +1,28 @@
+# -*- mode: sh -*-
+REPO="ajeetdsouza/zoxide"
+DPKG_BASENAME="zoxide"
+DOWNLOAD_FILENAME="zoxide-\$DPKG_VERSION-x86_64-unknown-linux-musl.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "zoxide|755|/usr/bin/zoxide"
+ "man/man1/zoxide.1|644|/usr/share/zoxide/man/man1/zoxide.1"
+ "man/man1/zoxide-add.1|644|/usr/share/zoxide/man/man1/zoxide-add.1"
+ "man/man1/zoxide-remove.1|644|/usr/share/zoxide/man/man1/zoxide-remove.1"
+ "man/man1/zoxide-query.1|644|/usr/share/zoxide/man/man1/zoxide-query.1"
+ "man/man1/zoxide-init.1|644|/usr/share/zoxide/man/man1/zoxide-init.1"
+ "man/man1/zoxide-import.1|644|/usr/share/zoxide/man/man1/zoxide-import.1"
+ "completions/_zoxide|644|/usr/share/zoxide/completions/_zoxide"
+ "completions/zoxide.ts|644|/usr/share/zoxide/completions/zoxide.ts"
+ "completions/zoxide.fish|644|/usr/share/zoxide/completions/zoxide.fish"
+ "completions/_zoxide.ps1|644|/usr/share/zoxide/completions/_zoxide.ps1"
+ "completions/zoxide.elv|644|/usr/share/zoxide/completions/zoxide.elv"
+ "completions/README.md|644|/usr/share/zoxide/completions/README.md"
+ "completions/zoxide.nu|644|/usr/share/zoxide/completions/zoxide.nu"
+ "completions/zoxide.bash|644|/usr/share/zoxide/completions/zoxide.bash"
+)
+CLEANUP_FILES="zoxide man/man1/zoxide.1 man/man1/zoxide-add.1 man/man1/zoxide-remove.1 man/man1/zoxide-query.1 man/man1/zoxide-init.1 man/man1/zoxide-import.1 completions/_zoxide completions/zoxide.ts completions/zoxide.fish completions/_zoxide.ps1 completions/zoxide.elv completions/README.md completions/zoxide.nu completions/zoxide.bash"
+PACKAGE_DESCRIPTION="zoxide is a smart cd command that teaches you to navigate faster by remembering your most used directories and provides a faster way to switch to them."
+PACKAGE_SUMMARY="zoxide - a smarter cd command"
+PACKAGE_LICENSE="MIT"
+

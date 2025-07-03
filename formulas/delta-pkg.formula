@@ -1,0 +1,16 @@
+# -*- mode: sh -*-
+REPO="dandavison/delta"
+DPKG_BASENAME="delta"
+DOWNLOAD_FILENAME="delta-\$DPKG_VERSION-x86_64-unknown-linux-gnu.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "delta-0.18.2-x86_64-unknown-linux-gnu/delta|755|/usr/bin/delta"
+ "delta-0.18.2-x86_64-unknown-linux-gnu/LICENSE|644|/usr/share/delta/LICENSE"
+ "delta-0.18.2-x86_64-unknown-linux-gnu/README.md|644|/usr/share/delta/README.md"
+)
+CLEANUP_FILES="delta-0.18.2-x86_64-unknown-linux-gnu/delta delta-0.18.2-x86_64-unknown-linux-gnu/LICENSE delta-0.18.2-x86_64-unknown-linux-gnu/README.md"
+PACKAGE_DESCRIPTION="delta is a syntax-highlighting pager for git. It helps to make the output of git commands more readable and visually appealing."
+PACKAGE_SUMMARY="delta is a syntax-highlighting pager for git"
+PACKAGE_LICENSE="MIT"
+

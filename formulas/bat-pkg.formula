@@ -1,0 +1,22 @@
+# -*- mode: sh -*-
+REPO="sharkdp/bat"
+DPKG_BASENAME="bat"
+DOWNLOAD_FILENAME="bat-\$LATEST_VER-x86_64-unknown-linux-gnu.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/bat|755|/usr/bin/bat"
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/bat.1|644|/usr/share/bat/bat.1"
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/CHANGELOG.md|644|/usr/share/bat/CHANGELOG.md"
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/LICENSE-APACHE|644|/usr/share/bat/LICENSE-APACHE"
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/LICENSE-MIT|644|/usr/share/bat/LICENSE-MIT"
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/README.md|644|/usr/share/bat/README.md"
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/autocomplete/_bat.ps1|644|/usr/share/bat/autocomplete/_bat.ps1"
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/autocomplete/bat.fish|644|/usr/share/bat/autocomplete/bat.fish"
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/autocomplete/bat.bash|644|/usr/share/bat/autocomplete/bat.bash"
+ "bat-v0.25.0-x86_64-unknown-linux-gnu/autocomplete/bat.zsh|644|/usr/share/bat/autocomplete/bat.zsh"
+)
+CLEANUP_FILES="bat-v0.25.0-x86_64-unknown-linux-gnu/bat bat-v0.25.0-x86_64-unknown-linux-gnu/bat.1 bat-v0.25.0-x86_64-unknown-linux-gnu/CHANGELOG.md bat-v0.25.0-x86_64-unknown-linux-gnu/LICENSE-APACHE bat-v0.25.0-x86_64-unknown-linux-gnu/LICENSE-MIT bat-v0.25.0-x86_64-unknown-linux-gnu/README.md bat-v0.25.0-x86_64-unknown-linux-gnu/autocomplete/_bat.ps1 bat-v0.25.0-x86_64-unknown-linux-gnu/autocomplete/bat.fish bat-v0.25.0-x86_64-unknown-linux-gnu/autocomplete/bat.bash bat-v0.25.0-x86_64-unknown-linux-gnu/autocomplete/bat.zsh"
+PACKAGE_DESCRIPTION="bat is a cat(1) clone with wings. It provides syntax highlighting,Git integration, and an array of other features that improve the experience of viewing source code."
+PACKAGE_SUMMARY="bat is a cat clone with syntax highlighting and Git integration"
+PACKAGE_LICENSE="MIT"

@@ -1,0 +1,20 @@
+# -*- mode: sh -*-
+REPO="sharkdp/hexyl"
+DPKG_BASENAME="hexyl"
+DOWNLOAD_FILENAME="hexyl-\$LATEST_VER-x86_64-unknown-linux-gnu.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "hexyl-v0.16.0-x86_64-unknown-linux-gnu/hexyl|755|/usr/bin/hexyl"
+ "hexyl-v0.16.0-x86_64-unknown-linux-gnu/CHANGELOG.md|644|/usr/share/hexyl/CHANGELOG.md"
+ "hexyl-v0.16.0-x86_64-unknown-linux-gnu/LICENSE-APACHE|644|/usr/share/hexyl/LICENSE-APACHE"
+ "hexyl-v0.16.0-x86_64-unknown-linux-gnu/LICENSE-MIT|644|/usr/share/hexyl/LICENSE-MIT"
+ "hexyl-v0.16.0-x86_64-unknown-linux-gnu/README.md|644|/usr/share/hexyl/README.md"
+ "hexyl-v0.16.0-x86_64-unknown-linux-gnu/hexyl.1|644|/usr/share/man/man1/hexyl.1"
+)
+CLEANUP_FILES="hexyl-v0.16.0-x86_64-unknown-linux-gnu"
+PACKAGE_DESCRIPTION="hexyl is a command-line hex viewer with a rich feature set. It provides various view modes,
+ syntax highlighting, and integrates well with most terminal emulators."
+PACKAGE_SUMMARY="hexyl is a command-line hex viewer"
+PACKAGE_LICENSE="MIT"
+

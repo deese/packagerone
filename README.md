@@ -5,9 +5,9 @@ Small set of scripts that creates a debian package from binary packages (usually
 
 Currently the following packages are handled:
 
-- Direct download from github in deb form: zoxide, fd, hexyl, bat, ripgrep, gopass
-- Deb created from binary release: eza, fzf, fx, neovim (appimage), helix editor (appimage)
+- Deb/RPM created from binary release: eza, fzf, fx, neovim (appimage), helix editor (appimage), neovim, starship, bat, delta, fd, gitleaks, ripgrep, zoxide, uv 
 
+Buildkite removed the free tier so I switched to a local repo in AWS. 
 
 Configuration
 =============
@@ -31,11 +31,17 @@ Arguments
 The script has 2 different arguments
 
 ```
-Usage: runner.sh [-V] [-v]
+Usage: runner.sh [-V] [-v] [-f] [-R] [-D]
+-----
+-b - Build specific formula
+-D - Skip DEB package creation
+-f - force build without checking versions
+-F <repository/name> - Automatically create formulas using AI (this requires human review)
+-R - Skip RPM package creation
+-u - Upload created packages
+-v - Enable verbose mode
+-V - Run version check and exit.
 ```
-
--v to enable VERBOSE mode
--V to enable version checks. 
 
 The version check will show something similar to this:
 
@@ -50,12 +56,11 @@ sharkdp/fd                   v10.2.0 2024-08-23 - 287 day(s) ago (unchanged)
 sharkdp/bat                  v0.25.0 2025-01-07 - 149 day(s) ago (unchanged)
 sharkdp/hexyl                v0.16.0 2024-12-27 - 161 day(s) ago (unchanged)
 burntsushi/ripgrep            14.1.1 2024-09-09 - 270 day(s) ago (unchanged)
-
 ```
 
 TODO
 ====
 
 
-- Create the uploader for Buildkite in Python to avoid multiple uploads.
+- ~~Create the uploader for Buildkite in Python to avoid multiple uploads.~~
 - ~~Create a version tracker to avoid manually updating the versions.~~
