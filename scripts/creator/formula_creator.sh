@@ -48,6 +48,29 @@ function stderr {
     echo "$1" >&2
 }
 
+function normalize_github_repo {
+    local input="$1"
+    
+    # If it's already in owner/repo format, return as-is
+    if [[ "$input" =~ ^[^/]+/[^/]+$ ]]; then
+        echo "$input"
+        return 0
+    fi
+    
+    # Extract owner/repo from various GitHub URL formats
+    if [[ "$input" =~ github\.com/([^/]+/[^/]+) ]]; then
+        local repo_part="${BASH_REMATCH[1]}"
+        # Remove any trailing path components (like /releases/tag/...)
+        repo_part=$(echo "$repo_part" | cut -d'/' -f1,2)
+        echo "$repo_part"
+        return 0
+    fi
+    
+    # If we can't parse it, return the original input
+    echo "$input"
+    return 1
+}
+
 function query_ai {
     if [ -z "$OPENROUTER_API_KEY" ]; then
         echo "Set the \$OPENROUTER_API_KEY in order to use the LLM query."
@@ -155,7 +178,14 @@ function get_file_listing {
 }
 
 
-DOWNLOAD_LINK=$(get_repo_data "$1")
+# Normalize the input to owner/repo format
+REPO=$(normalize_github_repo "$1")
+if [[ $? -ne 0 ]]; then
+    stderr "Warning: Could not parse GitHub repository from input: $1"
+    stderr "Using input as-is, but this may cause issues."
+fi
+
+DOWNLOAD_LINK=$(get_repo_data "$REPO")
 echo "Download link: $DOWNLOAD_LINK"
 if [[ "$DOWNLOAD_LINK" != *"https://github.com"* ]]; then
         echo $DOWNLOAD_LINK
@@ -171,7 +201,7 @@ DATA=$(query_ai "$TEMPLATE")
 FORMULA=$(echo $DATA | jq -r '.choices[0].text')
 
 # Extract package name from repo (e.g., "sharkdp/bat" -> "bat")
-PACKAGE_NAME=$(basename "$1")
+PACKAGE_NAME=$(basename "$REPO")
 FORMULA_FILE="formulas/${PACKAGE_NAME}-pkg.formula"
 
 # Show the generated formula to the user
