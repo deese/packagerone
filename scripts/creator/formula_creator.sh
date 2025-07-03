@@ -168,6 +168,12 @@ TEMPLATE=$(<"$CDIR/chatgpt.prompt")
 TEMPLATE=$(var_substitution "$TEMPLATE")
 
 DATA=$(query_ai "$TEMPLATE")
-echo $DATA | jq -r '.choices[0].text' 
+FORMULA=$(echo $DATA | jq -r '.choices[0].text')
+
+
+if [ -d "formulas" && ! -f "formulas/uv-pkg.formula" ]; then
+
+fi
+
 
 run_clean $DOWNLOAD_LINK
