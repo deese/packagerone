@@ -170,9 +170,17 @@ TEMPLATE=$(var_substitution "$TEMPLATE")
 DATA=$(query_ai "$TEMPLATE")
 FORMULA=$(echo $DATA | jq -r '.choices[0].text')
 
+# Extract package name from repo (e.g., "sharkdp/bat" -> "bat")
+PACKAGE_NAME=$(basename "$1")
+FORMULA_FILE="formulas/${PACKAGE_NAME}-pkg.formula"
 
-if [ -d "formulas" && ! -f "formulas/uv-pkg.formula" ]; then
-
+# Save the formula to file
+if [ -d "formulas" ]; then
+    echo "$FORMULA" > "$FORMULA_FILE"
+    echo "Formula saved to: $FORMULA_FILE"
+else
+    echo "Error: formulas directory does not exist"
+    exit 1
 fi
 
 
