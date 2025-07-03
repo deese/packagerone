@@ -18,6 +18,9 @@ $PACKAGE_DESCRIPTION
 %build
 # Nothing to build
 
+%define __brp_strip %{nil}
+%define __os_install_post %{nil}
+
 %install
 mkdir -p %{buildroot}/usr/bin
 $INSTALL_CMDS

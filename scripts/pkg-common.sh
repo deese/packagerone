@@ -15,21 +15,21 @@ build_package() {
 
     # Validate required variables
     if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
-        echo "Error: Missing required configuration variables"
+        logme "[PKGBUILD] Error: Missing required configuration variables"
         exit 1
     fi
 
     # Get latest version
     LATEST_VER=$(get_latest_ver "$REPO")
     if [ $? -eq 1 ]; then
-        echo "Fatal error: $LATEST_VER"
+        logme "[PKGBUILD] Fatal error: $LATEST_VER"
         exit 1
     fi
 
     # Check if already up to date
     CURRENT_VERSION=$(get_stored_version "$REPO")
     if [[ $FORCE -ne 1 && "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
-        echo "[INFO] $REPO is up to date ($CURRENT_VERSION)"
+        logme "[PKGBUILD] $REPO is up to date ($CURRENT_VERSION)"
         return 0
     fi
     
@@ -49,27 +49,32 @@ build_package() {
     # Download file
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
+    logme "[PKGBUILD] Using build folder: $BUILD_FOLDER" 
 
-    logme "Downloading file1: $DOWNLOAD_URL" 1
+    logme "[PKGBUILD] Downloading file: $DOWNLOAD_URL" 1
     $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
 
     if [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
-        logme "Error downloading file: $DOWNLOAD_URL" 
+        logme "[PKGBUILD] Error downloading file: $DOWNLOAD_URL" 
         return  1
+    else 
+        logme "[PKGBUILD] File downloaded to $BUILD_FOLDER/$DOWNLOAD_FILENAME" 1
     fi
 
     # Extract if needed
-    logme "Extracting file"
+    logme "[PKGBUILD] Extracting file"
 
     if [[ -n "$EXTRACT_CMD" ]]; then
         if [[ "$EXTRACT_CMD" == *"tar"* ]]; then
+            echo "Extracting to $BUILD_FOLDER" 
             $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER"
         else
+            echo "Regular extract"
             $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
         fi
     fi
 
-    logme "File extracted. Running builders"
+    logme "[PKGBUILD] File extracted. Running builders"
 
     if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
         build_deb
@@ -81,7 +86,7 @@ build_package() {
 
     # Cleanup
     if [[ -n "$CLEANUP_FILES" ]]; then
-        logme "Cleaning up files." 1
+        logme "[PKGBUILD] Cleaning up files." 1
         rm -fr $CLEANUP_FILES
     fi
 

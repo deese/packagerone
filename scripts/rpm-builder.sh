@@ -15,7 +15,7 @@ build_rpm() {
     # Source the configuration
     #source "$config_file"
     #     
-    logme "Building $DPKG_BASENAME rpm"
+    logme "[RPM] Building $DPKG_BASENAME rpm"
 
 	INSTALL_CMDS=""
     PACKAGE_NAME=$DPKG_BASENAME
@@ -44,6 +44,10 @@ build_rpm() {
 
     rpmbuild -bb $BUILD_FOLDER/rpmbuild/SPECS/$PACKAGE_NAME.spec --define "_topdir $BUILD_FOLDER/rpmbuild" --define "_rpmdir $OUTPUT_FOLDER/rpm" >> $RUNLOG 2>&1
     
+    if [ $? -eq 0 ]; then
+        RPM_PKG_NAME=$(ls $OUTPUT_FOLDER/rpm/$TARGET_ARCH/$PACKAGE_NAME*)
+        logme "[RPM] Successfully built rpm package: $RPM_PKG_NAME"
+    fi
     
 }
 #install -m 0755 %{SOURCE0} %{buildroot}/usr/bin/eza
