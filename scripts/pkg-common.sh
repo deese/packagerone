@@ -68,6 +68,13 @@ build_package() {
         if [[ "$EXTRACT_CMD" == *"tar"* ]]; then
             echo "Extracting to $BUILD_FOLDER" 
             $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER"
+        elif [[ "$EXTRACT_CMD" == "cp" ]]; then
+            #cp "$BUILD_FOLDER/$DOWNLOAD_FILENAME" "$BUILD_FOLDER"
+            true
+        elif [[ "$EXTRACT_CMD" == "gunzip" ]]; then
+            ls -l  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
+            gunzip "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
+            ls -l "$BUILD_FOLDER"
         else
             echo "Regular extract"
             $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME"

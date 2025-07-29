@@ -29,7 +29,10 @@ build_rpm() {
 	for entry in "${INSTALL_FILES[@]}"; do
         IFS='|' read -r source perms destination <<< "$entry"
         source=$(var_substitution "$source")
-        cp $BUILD_FOLDER/$source $BUILD_FOLDER/rpmbuild/SOURCES/
+        if [[ "$source" != "/"* ]]; then
+            source="$BUILD_FOLDER/$source"
+        fi
+        cp $source $BUILD_FOLDER/rpmbuild/SOURCES/
         PACKAGE_SOURCES="$PACKAGE_SOURCES\nSource$count:\t\t$source\n"
         PACKAGE_FILES="$PACKAGE_FILES%attr($perms, root, root) $destination\n"
         INSTALL_CMDS="${INSTALL_CMDS}install -Dm$perms %{SOURCE$count}  %{buildroot}$destination\n"

@@ -54,7 +54,11 @@ build_deb () {
     for entry in "${INSTALL_FILES[@]}"; do
         IFS='|' read -r source perms destination <<< "$entry"
         source=$(var_substitution "$source")
-        install -Dm"$perms" "$BUILD_FOLDER/$source" "${DPKG_DIR}$destination"
+        echo "Installing $source from $BUILD_FOLDER"
+        if [[ "$source" != "/"* ]]; then 
+            source="$BUILD_FOLDER/$source"
+        fi 
+        install -Dm"$perms" "$source" "${DPKG_DIR}$destination"
     done
 
     # Create DEBIAN directory and control file

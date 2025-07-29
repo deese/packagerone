@@ -1,0 +1,16 @@
+REPO="atuinsh/atuin"
+DPKG_BASENAME="atuin"
+DOWNLOAD_FILENAME="atuin-\$TARGET_ARCH-unknown-linux-gnu.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "atuin-x86_64-unknown-linux-gnu/atuin|755|/usr/bin/atuin"
+ "atuin-x86_64-unknown-linux-gnu/README.md|644|/usr/share/atuin/README.md"
+ "atuin-x86_64-unknown-linux-gnu/CHANGELOG.md|644|/usr/share/atuin/CHANGELOG.md"
+ "atuin-x86_64-unknown-linux-gnu/LICENSE|644|/usr/share/atuin/LICENSE"
+)
+CLEANUP_FILES="atuin-x86_64-unknown-linux-gnu"
+PACKAGE_DESCRIPTION="atuin is a command-line tool that enhances the shell experience by providing historical tracking of commands, ensuring better organization and retrieval of the user's command history."
+
+PACKAGE_SUMMARY="atuin is a command-line tool for managing command history"
+PACKAGE_LICENSE="MIT"

@@ -1,0 +1,14 @@
+REPO="bootandy/dust"
+DPKG_BASENAME="dust"
+DOWNLOAD_FILENAME="dust-\$LATEST_VER-x86_64-unknown-linux-gnu.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "dust-\$LATEST_VER-x86_64-unknown-linux-gnu/dust|755|/usr/bin/dust"
+ "dust-\$LATEST_VER-x86_64-unknown-linux-gnu/LICENSE|644|/usr/share/dust/LICENSE"
+ "dust-\$LATEST_VER-x86_64-unknown-linux-gnu/README.md|644|/usr/share/dust/README.md"
+)
+CLEANUP_FILES="dust-\$LATEST_VER-x86_64-unknown-linux-gnu/dust dust-\$LATEST_VER-x86_64-unknown-linux-gnu/LICENSE dust-\$LATEST_VER-x86_64-unknown-linux-gnu/README.md dust-\$LATEST_VER-x86_64-unknown-linux-gnu"
+PACKAGE_DESCRIPTION="dust is a more intuitive version of the command-line du tool, providing a visual representation of disk usage that is easy to understand and navigate."
+PACKAGE_SUMMARY="dust is a command-line tool for visualizing disk usage"
+PACKAGE_LICENSE="MIT"
