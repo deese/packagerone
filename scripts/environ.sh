@@ -1,4 +1,6 @@
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
+if [ -z "$SCRIPT_DIR" ]; then 
+    SCRIPT_DIR=$(dirname "$(realpath "$0")")
+fi
 MAINTAINER="Deese <deese2k@gmail.com>"
 DPKG_ARCH="amd64"
 TARGET_ARCH="x86_64"

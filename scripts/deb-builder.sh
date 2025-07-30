@@ -32,24 +32,6 @@ build_deb () {
         return 0
     fi
 
-    # Download file
-    DOWNLOAD_FILENAME="$BUILD_FOLDER/$(var_substitution "$DOWNLOAD_FILENAME")"
-    DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
-
-    if [ ! -f $DOWNLOAD_FILENAME ]; then
-        $WGET "$DOWNLOAD_URL" -O "$DOWNLOAD_FILENAME"
-    fi
-
-    if [ ! -f "$DOWNLOAD_FILENAME" ]; then
-        logme "[DEB] Error downloading file: $DOWNLOAD_URL"
-        return  1
-    fi
-
-    # Extract if needed
-    #if [[ -n "$EXTRACT_CMD" ]]; then
-    #    $EXTRACT_CMD "$DOWNLOAD_FILENAME"
-    #fi
-
     # Install files
     for entry in "${INSTALL_FILES[@]}"; do
         IFS='|' read -r source perms destination <<< "$entry"

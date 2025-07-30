@@ -1,6 +1,7 @@
 #!/bin/bash
-SCRIPT_DIR=$(dirname "$(realpath "$0")")
+export SCRIPT_DIR=$(dirname "$(realpath "$0")")
 set -e
+
 
 source "$SCRIPT_DIR/scripts/functions.sh"
 source "$SCRIPT_DIR/scripts/pkg-common.sh"
