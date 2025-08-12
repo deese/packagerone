@@ -15,6 +15,7 @@ export CHANGES_FILE=$(mktemp --suffix ".changes")
 
 function do_upload {
     if [ ! -z "$PKG1UPLOADER" ]; then
+        logme "Uploader set to: $PKG1UPLOADER" 1 
       if [ ! -f "$SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh" ]; then
         logme "uploader_$PKG1UPLOADER.sh doesn't exit"
         echo "uploader_$PKG1UPLOADER.sh doesn't exit"
@@ -103,9 +104,8 @@ for i in $SCRIPT_DIR/formulas/*.formula; do
   build_package $i
 done
 
-exit 0
-
 if [ -s $CHANGES_FILE ]; then
+    logme "Changes detected. Running upload script if available."
     do_upload
 fi
 

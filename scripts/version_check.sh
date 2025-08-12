@@ -1,8 +1,5 @@
 #!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
-echo "$DB_DIR"
-echo "$SCRIPT_DIR"
-echo "Load"
 source $CDIR/functions.sh
 
 shopt -s nullglob
