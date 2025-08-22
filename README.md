@@ -1,13 +1,3 @@
-Packagerone
-===========
-
-
-
-Dependencies
-============
-
-sudo apt install -y curl wget jq fakeroot dpkg-dev rpm build-essential tar gzip coreutils bash
-grep sed awk findutils
 # Package Builder Tool
 
 A tool for automatically building DEB and RPM packages from GitHub releases of popular command-line tools.
@@ -217,6 +207,3 @@ Enable verbose output:
 3. Test the build process
 4. Submit a pull request
 
-## License
-
-[Add your license information here]
