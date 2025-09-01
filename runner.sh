@@ -37,7 +37,7 @@ function cleanup {
 }
 trap cleanup EXIT
 
-read_env
+read_env $SCRIPT_DIR/.env
 
 while getopts "ufVvhF:b:RD" opt; do
   case "$opt" in
