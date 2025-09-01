@@ -29,6 +29,8 @@ This tool automates the process of:
 - `rpmbuild` (for RPM packages)
 - `fakeroot`
 - `jq` (for JSON processing)
+- `node-deb` 
+- `npm`
 
 ### Optional Dependencies
 - **GitHub Token**: Set `GITHUB_TOKEN` environment variable to avoid API rate limits
