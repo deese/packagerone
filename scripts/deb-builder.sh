@@ -20,10 +20,16 @@ build_deb () {
     fi
 
     # Setup package variables
-    DPKG_VERSION="${LATEST_VER#v}"
+    #DPKG_VERSION="${LATEST_VER#v}"
+    DPKG_VERSION="${LATEST_VER#[rv]}"
     DPKG_DIR="$BUILD_FOLDER/${DPKG_BASENAME}-${LATEST_VER}-${TARGET_ARCH}"
     DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
     DPKG_PATH="$OUTPUT_FOLDER/deb/$DPKG_NAME"
+
+    if [[ "$DPKG_VERSION" =~ [^0-9.-] ]]; then
+      logme "[DEB] Fatal error: \$DPKG_VERSION contains invalid characters: $DPKG_VERSION"
+      exit 1
+    fi
 
     logme "[DEB] Building $DPKG_BASENAME deb package"
     # Check if package already exists
@@ -63,11 +69,12 @@ EOF
     OLD_DPKG_NAME="${DPKG_BASENAME}_*_${DPKG_ARCH}.deb"
    
     for i in $OUTPUT_FOLDER/deb/$OLD_DPKG_NAME; do
-        logme "[DEB] Removing old file: $i" 1
+        logme -v "[DEB] Removing old file: $i"
         rm -f "$i"
     done
      
     # Build package
+    logme -v "[DEB] Running the builder"
     fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}" >> $RUNLOG 2>&1
 
     # Cleanup

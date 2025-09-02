@@ -10,29 +10,30 @@ build_package() {
 
     # Source the configuration
     source "$config_file"
-    
-    logme "[PKGBUILD] Building package with formula: $1"
+
+    logme -n "[PKGBUILD] Building $REPO"
+    logme -v " - Formula path: $1"
 
     # Validate required variables
     if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
-        logme "[PKGBUILD] Error: Missing required configuration variables"
+        logme "\n[PKGBUILD] Error: Missing required configuration variables"
         exit 1
     fi
 
     # Get latest version
     LATEST_VER=$(get_latest_ver "$REPO")
     if [ $? -eq 1 ]; then
-        logme "[PKGBUILD] Fatal error: $LATEST_VER"
+        logme "\n[PKGBUILD] Fatal error: $LATEST_VER"
         exit 1
     fi
 
     # Check if already up to date
     CURRENT_VERSION=$(get_stored_version "$REPO")
     if [[ $FORCE -ne 1 && "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
-        logme "[PKGBUILD] $REPO is up to date ($CURRENT_VERSION)"
+        logme " up to date ($CURRENT_VERSION)"
         return 0
     fi
-    
+
     if [ ! -n "$_TMPFOLDER" ]; then
         _TMPFOLDER=$(mktemp -dt "pkgone-XXXXXXXX")
         BUILD_FOLDER="$_TMPFOLDER/build"
@@ -49,16 +50,16 @@ build_package() {
     # Download file
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
     DOWNLOAD_URL=$(var_substitution "$DOWNLOAD_URL_TEMPLATE")
-    logme "[PKGBUILD] Using build folder: $BUILD_FOLDER" 
+    logme "[PKGBUILD] Using build folder: $BUILD_FOLDER"
 
-    logme "[PKGBUILD] Downloading file: $DOWNLOAD_URL" 1
+    logme -v "[PKGBUILD] Downloading file: $DOWNLOAD_URL"
     $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
 
     if [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
-        logme "[PKGBUILD] Error downloading file: $DOWNLOAD_URL" 
+        logme "[PKGBUILD] Error downloading file: $DOWNLOAD_URL"
         return  1
-    else 
-        logme "[PKGBUILD] File downloaded to $BUILD_FOLDER/$DOWNLOAD_FILENAME" 1
+    else
+        logme -v "[PKGBUILD] File downloaded to $BUILD_FOLDER/$DOWNLOAD_FILENAME"
     fi
 
     # Extract if needed
@@ -66,7 +67,7 @@ build_package() {
 
     if [[ -n "$EXTRACT_CMD" ]]; then
         if [[ "$EXTRACT_CMD" == *"tar"* ]]; then
-            echo "Extracting to $BUILD_FOLDER" 
+            echo "Extracting to $BUILD_FOLDER"
             $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER"
         elif [[ "$EXTRACT_CMD" == "cp" ]]; then
             #cp "$BUILD_FOLDER/$DOWNLOAD_FILENAME" "$BUILD_FOLDER"
@@ -86,14 +87,14 @@ build_package() {
     if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
         build_deb
     fi
-    
+
     if [ ${SKIP_RPM_PACKAGE:-0} -ne 1 ]; then
         build_rpm
     fi
 
     # Cleanup
     if [[ -n "$CLEANUP_FILES" ]]; then
-        logme "[PKGBUILD] Cleaning up files." 1
+        logme -v "[PKGBUILD] Cleaning up files."
         rm -fr $CLEANUP_FILES
     fi
 

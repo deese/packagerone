@@ -8,15 +8,15 @@ function process_deb_file() {
   current_version=$(get_stored_version "$repo")
   version=$(get_latest_ver $repo)
   
-  logme "[DEBPROCESS] Processing deb: $1" 1 
+  logme -v "[DEBPROCESS] Processing deb: $1" 
 
   if [ $? -eq 1 ]; then
-    logme "Fatal error: $version" 1
+    logme -v "Fatal error: $version"
     return 1
   fi
 
   if [[ "$version" == "$current_version" ]]; then
-    logme "[INFO] $repo is up to date ($current_version)" 1
+    logme -v "[INFO] $repo is up to date ($current_version)"
     continue
   fi
 
