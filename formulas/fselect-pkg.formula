@@ -1,0 +1,12 @@
+REPO="jhspetersson/fselect"
+DPKG_BASENAME="fselect"
+DOWNLOAD_FILENAME="fselect-x86_64-linux-musl.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="gunzip"
+INSTALL_FILES=(
+ "fselect-x86_64-linux-musl|755|/usr/bin/fselect"
+)
+CLEANUP_FILES="fselect"
+PACKAGE_DESCRIPTION="fselect is a command line tool to select files and directories using Unix-like expressions and regular expressions. It offers a simple way to search for files based on attributes, content, and more."
+PACKAGE_SUMMARY="fselect is a powerful file selection tool"
+PACKAGE_LICENSE="MIT"

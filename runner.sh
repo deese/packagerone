@@ -15,7 +15,7 @@ export CHANGES_FILE=$(mktemp --suffix ".changes")
 
 function do_upload {
     if [ ! -z "$PKG1UPLOADER" ]; then
-        logme "Uploader set to: $PKG1UPLOADER" 1 
+        logme -v "Uploader set to: $PKG1UPLOADER" 
       if [ ! -f "$SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh" ]; then
         logme "uploader_$PKG1UPLOADER.sh doesn't exit"
         echo "uploader_$PKG1UPLOADER.sh doesn't exit"
@@ -30,7 +30,7 @@ function cleanup {
     rm -f $CHANGES_FILE
   fi
   if [ -f "$BUILD_FOLDER" ]; then 
-    logme "Removing build folder: $BUILD_FOLDER" 1 
+    logme -v "Removing build folder: $BUILD_FOLDER" 
     rm -fr "$BUILD_FOLDER"
   fi
   unset CHANGES_FILE
@@ -46,6 +46,7 @@ while getopts "ufVvhF:b:RD" opt; do
             echo "Error: -b requires a formula"
             exit 1
         fi
+        echo "Buil package $OPTARG"
 	    build_package "$OPTARG"
         exit 0
 		;;

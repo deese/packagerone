@@ -109,13 +109,73 @@ function var_substitution() {
 function ts () {
     date +"[%Y-%m-%d %H:%M:%S]"
 }
-function logme () {
+
+# logme: print/log a message with options.
+# Usage:
+#   logme [-v] [-n] [-e EOL] message...
+#   -v    also send the message to vprint
+#   -n    do NOT append any end-of-line to stdout
+#   -e    custom EOL (default "\n"); supports escapes like "\r\n"
+#
+# Notes:
+# - If $RUNLOG is set, the message is appended to that file with a timestamp.
+# - When both -n and -e are given, -n takes precedence (no EOL printed).
+
+logme() {
+  local verbose=0
+  local no_eol=0
+  local eol="\n"
+  local OPTIND=1 opt
+
+  while getopts ":vne:" opt; do
+    case "$opt" in
+      v) verbose=1 ;;
+      n) no_eol=1 ;;
+      e) eol="$OPTARG" ;;
+      \?)
+        printf 'Usage: logme [-v] [-n] [-e EOL] message...\n' >&2
+        return 2
+        ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+
+  # Remaining args form the message
+  local msg="$*"
+  [ -z "$msg" ] && { printf 'logme: empty message\n' >&2; return 2; }
+
+  # Write to log if requested
+  if [ -n "$RUNLOG" ]; then
+    # Keep logging always newline-terminated
+    printf "%s %s\n" "$(ts)" "$msg" >> "$RUNLOG"
+  fi
+
+  # Verbose path
+  if [ "$verbose" -eq 1 ]; then
+    vprint "$msg"
+    return 
+  fi
+
+  # Stdout path
+  if [ "$no_eol" -eq 1 ]; then
+    printf "%s" "$msg"
+  else
+    # %b interprets backslash escapes in $eol
+    printf "%s%b" "$msg" "$eol"
+  fi
+}
+
+function logme_old () {
+    EOL="\n"
     if [ ! -z "$RUNLOG" ]; then
         echo "$(ts) $1" >> $RUNLOG
     fi
     if [[ $2 -eq 1 ]]; then
-        vprint "$1"
+      vprint "$1"
     else
-        echo "$1"
+      if [[ ! -z "$2" ]]; then
+        EOL="$2"
+      fi
+      echo -n "$1$EOL"
     fi
 }
