@@ -6,3 +6,4 @@ dist/
 logs/
 .upload_tracker
 .aider*
+*.log

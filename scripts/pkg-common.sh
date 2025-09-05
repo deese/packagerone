@@ -11,8 +11,9 @@ build_package() {
     # Source the configuration
     source "$config_file"
 
-    logme -n "[PKGBUILD] Building $REPO"
-    logme -v " - Formula path: $1"
+    PAD_SIZE=$(( $(max_strlen line < <(grep ^REPO $SCRIPT_DIR/formulas/* | cut -f2 -d=)) * -1 ))
+    PAD_REPO=$(pad "$REPO" $PAD_SIZE)
+    logme -n "[PKGBUILD] Building $PAD_REPO"
 
     # Validate required variables
     if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
@@ -30,9 +31,12 @@ build_package() {
     # Check if already up to date
     CURRENT_VERSION=$(get_stored_version "$REPO")
     if [[ $FORCE -ne 1 && "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
-        logme " up to date ($CURRENT_VERSION)"
+        logme " - Up to date ($CURRENT_VERSION)"
         return 0
+    else
+      logme " - Building version: $CURRENT_VERSION"
     fi
+
 
     if [ ! -n "$_TMPFOLDER" ]; then
         _TMPFOLDER=$(mktemp -dt "pkgone-XXXXXXXX")

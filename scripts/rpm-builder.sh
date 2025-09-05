@@ -14,7 +14,7 @@ build_rpm() {
 
     # Source the configuration
     #source "$config_file"
-    #     
+    #
     logme "[RPM] Building $DPKG_BASENAME rpm"
 
 	INSTALL_CMDS=""
@@ -37,21 +37,29 @@ build_rpm() {
         PACKAGE_FILES="$PACKAGE_FILES%attr($perms, root, root) $destination\n"
         INSTALL_CMDS="${INSTALL_CMDS}install -Dm$perms %{SOURCE$count}  %{buildroot}$destination\n"
 		count=$((count + 1 ))
-    done
+  done
 
-    #TEMPLATE="$CDIR/rpm_template.spec"
-    TEMPLATE_CONTENT="$(<"$CDIR/rpm_template.spec")"
-    TEMPLATE="$(var_substitution "$TEMPLATE_CONTENT" "${PACKAGE_VARS[@]}")"
+  #TEMPLATE="$CDIR/rpm_template.spec"
+  TEMPLATE_CONTENT="$(<"$CDIR/rpm_template.spec")"
+  TEMPLATE="$(var_substitution "$TEMPLATE_CONTENT" "${PACKAGE_VARS[@]}")"
 
-    echo -e "$TEMPLATE" >  $BUILD_FOLDER/rpmbuild/SPECS/$PACKAGE_NAME.spec
+  OLD_RPM_NAME="${PACKAGE_NAME}-*.${TARGET_ARCH}.rpm"
 
-    rpmbuild -bb $BUILD_FOLDER/rpmbuild/SPECS/$PACKAGE_NAME.spec --define "_topdir $BUILD_FOLDER/rpmbuild" --define "_rpmdir $OUTPUT_FOLDER/rpm" >> $RUNLOG 2>&1
-    
-    if [ $? -eq 0 ]; then
-        RPM_PKG_NAME=$(ls $OUTPUT_FOLDER/rpm/$TARGET_ARCH/$PACKAGE_NAME*)
-        logme "[RPM] Successfully built rpm package: $RPM_PKG_NAME"
-    fi
-    
+  for i in $OUTPUT_FOLDER/rpm/$TARGET_ARCH/$OLD_RPM_NAME; do
+      logme -v "[RPM] Removing old file: $i"
+      rm -f "$i"
+  done
+
+  echo -e "$TEMPLATE" >  $BUILD_FOLDER/rpmbuild/SPECS/$PACKAGE_NAME.spec
+
+  rpmbuild -bb $BUILD_FOLDER/rpmbuild/SPECS/$PACKAGE_NAME.spec --define "_topdir $BUILD_FOLDER/rpmbuild" --define "_rpmdir $OUTPUT_FOLDER/rpm" >> $RUNLOG 2>&1
+
+
+  if [ $? -eq 0 ]; then
+      RPM_PKG_NAME=$(ls $OUTPUT_FOLDER/rpm/$TARGET_ARCH/$PACKAGE_NAME*)
+      logme "[RPM] Successfully built rpm package: $RPM_PKG_NAME"
+  fi
+
 }
 #install -m 0755 %{SOURCE0} %{buildroot}/usr/bin/eza
 

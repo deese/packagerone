@@ -15,7 +15,7 @@ export CHANGES_FILE=$(mktemp --suffix ".changes")
 
 function do_upload {
     if [ ! -z "$PKG1UPLOADER" ]; then
-        logme -v "Uploader set to: $PKG1UPLOADER" 
+        logme -v "Uploader set to: $PKG1UPLOADER"
       if [ ! -f "$SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh" ]; then
         logme "uploader_$PKG1UPLOADER.sh doesn't exit"
         echo "uploader_$PKG1UPLOADER.sh doesn't exit"
@@ -29,8 +29,8 @@ function cleanup {
   if [ -f $CHANGES_FILE ]; then
     rm -f $CHANGES_FILE
   fi
-  if [ -f "$BUILD_FOLDER" ]; then 
-    logme -v "Removing build folder: $BUILD_FOLDER" 
+  if [ -f "$BUILD_FOLDER" ]; then
+    logme -v "Removing build folder: $BUILD_FOLDER"
     rm -fr "$BUILD_FOLDER"
   fi
   unset CHANGES_FILE
@@ -41,7 +41,7 @@ read_env $SCRIPT_DIR/.env
 
 while getopts "ufVvhF:b:RD" opt; do
   case "$opt" in
-    b) 
+    b)
         if [[ -z "$OPTARG" ]]; then
             echo "Error: -b requires a formula"
             exit 1
@@ -81,7 +81,7 @@ while getopts "ufVvhF:b:RD" opt; do
     *)
       echo "Usage: $0 [-V] [-v] [-f] [-R] [-D]"
       echo "-----"
-	  echo "-b - Build specific formula"
+      echo "-b - Build specific formula"
       echo "-D - Skip DEB package creation"
       echo "-f - force build without checking versions"
       echo "-F <repository/name> - Automatically create formulas using AI (this requires human review)"

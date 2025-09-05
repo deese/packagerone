@@ -153,7 +153,7 @@ logme() {
   # Verbose path
   if [ "$verbose" -eq 1 ]; then
     vprint "$msg"
-    return 
+    return
   fi
 
   # Stdout path
@@ -163,6 +163,10 @@ logme() {
     # %b interprets backslash escapes in $eol
     printf "%s%b" "$msg" "$eol"
   fi
+}
+
+function pad () {
+	[ "$#" -gt 1 ] && [ -n "$2" ] && printf "%$2.${2#-}s" "$1";
 }
 
 function logme_old () {
@@ -179,3 +183,23 @@ function logme_old () {
       echo -n "$1$EOL"
     fi
 }
+
+max_strlen() {
+    local mode=$1
+    local max=0 len item
+
+    if [[ $mode == "line" ]]; then
+        while IFS= read -r item; do
+            len=${#item}
+            (( len > max )) && max=$len
+        done
+    else # default: word mode
+        for item in "$@"; do
+            len=${#item}
+            (( len > max )) && max=$len
+        done
+    fi
+
+    echo "$max"
+}
+

@@ -1,4 +1,4 @@
-if [ -z "$SCRIPT_DIR" ]; then 
+if [ -z "$SCRIPT_DIR" ]; then
     SCRIPT_DIR=$(dirname "$(realpath "$0")")
 fi
 MAINTAINER="Deese <deese2k@gmail.com>"
@@ -12,6 +12,6 @@ DB_FILE="$SCRIPT_DIR/versions.db"
 LOGFOLDER="$SCRIPT_DIR/logs"
 RUNLOG="$LOGFOLDER/$(date +"%Y%m%d%H%M%S-pkgone.log")"
 VERBOSE=0
-
+PAD_SIZE=-20
 
 mkdir -p $OUTPUT_FOLDER $LOGFOLDER
