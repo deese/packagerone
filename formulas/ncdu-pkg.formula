@@ -1,0 +1,11 @@
+REPO="local://ncdu*.tar.gz"
+DPKG_BASENAME="ncdu"
+EXTRACT_CMD="tar zxf"
+EXTRACT_RE=ncdu-([^-]*)-linux-([^\.]+).*
+VERSION_ID=1
+INSTALL_FILES=(
+    "ncdu|755|/usr/bin/ncdu"
+)
+CLEANUP_FILES="ncdu"
+PACKAGE_DESCRIPTION="Ncdu is a disk usage analyzer with a text-mode user interface. It is designed to find space hogs on a remote server where you don’t have an entire graphical setup available, but it is a useful tool even on regular desktop systems. Ncdu aims to be fast, simple, easy to use, and should be able to run on any POSIX-like system."
+

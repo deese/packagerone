@@ -15,20 +15,14 @@ build_package() {
     PAD_REPO=$(pad "$REPO" $PAD_SIZE)
     logme -n "[PKGBUILD] Building $PAD_REPO"
 
-    # Validate required variables
-    if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
-        logme "\n[PKGBUILD] Error: Missing required configuration variables"
-        exit 1
+    if [[ "$REPO" == "local://"* ]]; then
+      prepare_local_package
+    else
+      prepare_remote_package
     fi
 
-    # Get latest version
-    LATEST_VER=$(get_latest_ver "$REPO")
-    if [ $? -eq 1 ]; then
-        logme "\n[PKGBUILD] Fatal error: $LATEST_VER"
-        exit 1
-    fi
+    ## check if the required variables are ready and process
 
-    # Check if already up to date
     CURRENT_VERSION=$(get_stored_version "$REPO")
     if [[ $FORCE -ne 1 && "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
         logme " - Up to date ($CURRENT_VERSION)"
@@ -44,12 +38,38 @@ build_package() {
         mkdir -p $BUILD_FOLDER
     fi
 
-    # Setup package variables
     DPKG_VERSION="${LATEST_VER#v}"
+    # Setup package variables
     DPKG_DIR="${DPKG_BASENAME}-${LATEST_VER}-${TARGET_ARCH}"
     DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
     DPKG_PATH="./$OUTPUT_FOLDER/$DPKG_NAME"
     PACKAGE_VERSION=$DPKG_VERSION
+}
+
+prepare_local_package() {
+  ## now we need to get the version from the file
+  ## Add to the formula how to extract the version
+
+}
+
+
+prepare_remote_package() {
+
+    # Validate required variables
+    if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
+        logme "\n[PKGBUILD] Error: Missing required configuration variables"
+        exit 1
+    fi
+
+    # Get latest version
+    LATEST_VER=$(get_latest_ver "$REPO")
+    if [ $? -eq 1 ]; then
+        logme "\n[PKGBUILD] Fatal error: $LATEST_VER"
+        exit 1
+    fi
+
+    # Check if already up to date
+
 
     # Download file
     DOWNLOAD_FILENAME=$(var_substitution "$DOWNLOAD_FILENAME")
@@ -57,9 +77,9 @@ build_package() {
     logme "[PKGBUILD] Using build folder: $BUILD_FOLDER"
 
     logme -v "[PKGBUILD] Downloading file: $DOWNLOAD_URL"
-    
-    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"  ||  rc=$? 
-    
+
+    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"  ||  rc=$?
+
     echo "Downloaded: $rc"
 
     if [[ -z $rc && $rc -ne 0 ]]; then
