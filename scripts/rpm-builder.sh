@@ -32,11 +32,15 @@ build_rpm() {
         if [[ "$source" != "/"* ]]; then
             source="$BUILD_FOLDER/$source"
         fi
-        cp $source $BUILD_FOLDER/rpmbuild/SOURCES/
-        PACKAGE_SOURCES="$PACKAGE_SOURCES\nSource$count:\t\t$source\n"
-        PACKAGE_FILES="$PACKAGE_FILES%attr($perms, root, root) $destination\n"
-        INSTALL_CMDS="${INSTALL_CMDS}install -Dm$perms %{SOURCE$count}  %{buildroot}$destination\n"
-		count=$((count + 1 ))
+        if [ -f "$source" ]; then 
+            cp $source $BUILD_FOLDER/rpmbuild/SOURCES/
+            PACKAGE_SOURCES="$PACKAGE_SOURCES\nSource$count:\t\t$source\n"
+            PACKAGE_FILES="$PACKAGE_FILES%attr($perms, root, root) $destination\n"
+            INSTALL_CMDS="${INSTALL_CMDS}install -Dm$perms %{SOURCE$count}  %{buildroot}$destination\n"
+            count=$((count + 1 ))
+        else
+            echo "File doesn't exist: $source"
+        fi
   done
 
   #TEMPLATE="$CDIR/rpm_template.spec"

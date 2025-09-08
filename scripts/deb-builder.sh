@@ -46,7 +46,11 @@ build_deb () {
         if [[ "$source" != "/"* ]]; then 
             source="$BUILD_FOLDER/$source"
         fi 
-        install -Dm"$perms" "$source" "${DPKG_DIR}$destination"
+        if [ -f "$source" ]; then
+            install -Dm"$perms" "$source" "${DPKG_DIR}$destination"
+        else
+            echo "File doesn't exist: $source"
+        fi
     done
 
     # Create DEBIAN directory and control file

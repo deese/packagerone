@@ -1,6 +1,7 @@
 REPO="muesli/duf"
 DPKG_BASENAME="duf"
 DOWNLOAD_FILENAME="duf_\$DPKG_VERSION_linux_\$TARGET_ARCH.tar.gz"
+DOWNLOAD_FILENAME="duf_linux_\$TARGET_ARCH.tar.gz"
 DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
 EXTRACT_CMD="tar zxf"
 INSTALL_FILES=(

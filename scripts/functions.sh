@@ -153,15 +153,14 @@ logme() {
   # Verbose path
   if [ "$verbose" -eq 1 ]; then
     vprint "$msg"
-    return
-  fi
-
-  # Stdout path
-  if [ "$no_eol" -eq 1 ]; then
-    printf "%s" "$msg"
   else
+  # Stdout path
+    if [ "$no_eol" -eq 1 ]; then
+     printf "%s" "$msg"
+    else
     # %b interprets backslash escapes in $eol
-    printf "%s%b" "$msg" "$eol"
+      printf "%s%b" "$msg" "$eol"
+    fi
   fi
 }
 
@@ -203,3 +202,15 @@ max_strlen() {
     echo "$max"
 }
 
+
+downloader () {
+    URL="$1"
+    DEST="$2"
+
+    if ! $WGET--timeout=20 --tries=3 -O "$DEST" "$URL"; then
+        rc=$?
+        echo "WARN: wget failed (rc=$rc) for $url" >&2
+    else
+        echo "0"
+    fi
+}

@@ -57,10 +57,14 @@ build_package() {
     logme "[PKGBUILD] Using build folder: $BUILD_FOLDER"
 
     logme -v "[PKGBUILD] Downloading file: $DOWNLOAD_URL"
-    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"
+    
+    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"  ||  rc=$? 
+    
+    echo "Downloaded: $rc"
 
-    if [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
-        logme "[PKGBUILD] Error downloading file: $DOWNLOAD_URL"
+    if [[ -z $rc && $rc -ne 0 ]]; then
+        # [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" && ! -s "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
+        logme "[PKGBUILD] Error downloading file (rc=$rc): $DOWNLOAD_URL"
         return  1
     else
         logme -v "[PKGBUILD] File downloaded to $BUILD_FOLDER/$DOWNLOAD_FILENAME"
