@@ -8,7 +8,7 @@ INSTALL_FILES=(
  "dust-\$LATEST_VER-x86_64-unknown-linux-gnu/LICENSE|644|/usr/share/dust/LICENSE"
  "dust-\$LATEST_VER-x86_64-unknown-linux-gnu/README.md|644|/usr/share/dust/README.md"
 )
-CLEANUP_FILES="dust-\$LATEST_VER-x86_64-unknown-linux-gnu/dust dust-\$LATEST_VER-x86_64-unknown-linux-gnu/LICENSE dust-\$LATEST_VER-x86_64-unknown-linux-gnu/README.md dust-\$LATEST_VER-x86_64-unknown-linux-gnu"
-PACKAGE_DESCRIPTION="dust is a more intuitive version of the command-line du tool, providing a visual representation of disk usage that is easy to understand and navigate."
-PACKAGE_SUMMARY="dust is a command-line tool for visualizing disk usage"
+CLEANUP_FILES="dust-v1.2.3-x86_64-unknown-linux-gnu/dust dust-v1.2.3-x86_64-unknown-linux-gnu/LICENSE dust-v1.2.3-x86_64-unknown-linux-gnu/README.md dust-v1.2.3-x86_64-unknown-linux-gnu"
+PACKAGE_DESCRIPTION="dust is a more intuitive version of du (disk usage) that gives you an overview of your disk usage in a more human-friendly way."
+PACKAGE_SUMMARY="dust is a more user-friendly du command"
 PACKAGE_LICENSE="MIT"

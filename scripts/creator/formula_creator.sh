@@ -83,12 +83,6 @@ function query_ai {
          -H "Content-Type: application/json" \
          -d "$PROMPT")
 
-    #LINK=$(echo $RESP | jq -r '.choices[0].message.content')
-    #if [[ "$LINK" == *"https://github.com"* ]]; then
-    #    echo "$LINK"
-    #else
-    #    echo "ERROR: $RESP"
-    #fi
     echo -e "PROMPT: $PROMPT" >> $OUTPUT_GPT
     echo "RESPONSE: $RESP" >> $OUTPUT_GPT
     echo "$RESP"
@@ -124,18 +118,6 @@ function get_download_links {
 
 }
 
-get_extension() {
-    filename=$(basename -- "$1")
-	ext="${filename##*.}"
-
-    if [[ "$filename" == *".tar."* && "$ext" != *"tar."* ]]; then
-        ext="tar.$ext"
-    fi
-	echo $ext 
-}
-
-#REPO="sharkdp/bat"
-
 function get_repo_data {
     stderr "Get Repo Data"
     download_latest_gh "$1"
@@ -169,12 +151,16 @@ function get_file_listing {
         exit 1
     fi
 
-    EXT=$(get_extension $FILENAME)
-
-    if [[ "$EXT" == "tar"* ]]; then
-        FILELIST=$(tar tvf $FILENAME)
-        echo -e "$FILELIST"
-    fi
+	case "$FILENAME" in
+		*.tar|*.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tbz|*.txz)
+			FILELIST=$(tar tvf "$FILENAME")
+			echo -e "$FILELIST"
+			;;
+		*)
+			# Opcional: manejar archivos que no coinciden
+			echo ""
+			;;
+	esac
 }
 
 
@@ -183,6 +169,18 @@ REPO=$(normalize_github_repo "$1")
 if [[ $? -ne 0 ]]; then
     stderr "Warning: Could not parse GitHub repository from input: $1"
     stderr "Using input as-is, but this may cause issues."
+fi
+# Extract package name from repo (e.g., "sharkdp/bat" -> "bat")
+PACKAGE_NAME=$(basename "$REPO")
+FORMULA_FILE="formulas/${PACKAGE_NAME}-pkg.formula"
+
+if [ -f $FORMULA_FILE ]; then
+    echo "Formula already exists: $FORMULA_FILE"
+    if [ $FORCE -ne 1 ]; then
+        exit 1
+    else
+        echo "Force is on. Continuing"
+    fi
 fi
 
 DOWNLOAD_LINK=$(get_repo_data "$REPO")
@@ -193,6 +191,10 @@ if [[ "$DOWNLOAD_LINK" != *"https://github.com"* ]]; then
 fi
 
 FILELIST=$(get_file_listing "$DOWNLOAD_LINK")
+if [ -z "$FILELIST" ]; then
+    echo "Empty file listing. Please review"
+    exit 1
+fi
 
 TEMPLATE=$(<"$CDIR/chatgpt.prompt")
 TEMPLATE=$(var_substitution "$TEMPLATE")
@@ -200,9 +202,10 @@ TEMPLATE=$(var_substitution "$TEMPLATE")
 DATA=$(query_ai "$TEMPLATE")
 FORMULA=$(echo $DATA | jq -r '.choices[0].text')
 
-# Extract package name from repo (e.g., "sharkdp/bat" -> "bat")
-PACKAGE_NAME=$(basename "$REPO")
-FORMULA_FILE="formulas/${PACKAGE_NAME}-pkg.formula"
+echo "File listing"
+echo "============"
+echo "$FILELIST"
+echo "============"
 
 # Show the generated formula to the user
 echo "Generated formula:"

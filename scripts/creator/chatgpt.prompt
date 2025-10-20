@@ -48,8 +48,8 @@ DOWNLOAD_FILENAME="fzf-\$DPKG_VERSION-linux_\$DPKG_ARCH.tar.gz"
 DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
 EXTRACT_CMD="tar zxf"
 INSTALL_FILES=(
-    "fzf-0.62.0-linux_amd64/fzf|755|/usr/bin/fzf"
-    "fzf-0.62.0-linux_amd64/extra/fzf.extra|644|/usr/share/fzf/extra/fzf.extra"
+    "fzf-\$LATEST_VER-linux_amd64/fzf|755|/usr/bin/fzf"
+    "fzf-\$LATEST_VER-linux_amd64/extra/fzf.extra|644|/usr/share/fzf/extra/fzf.extra"
     )
 CLEANUP_FILES="fzf extra/fzf.extra extra"
 PACKAGE_DESCRIPTION="fzf is a general-purpose command-line fuzzy finder.
@@ -74,9 +74,16 @@ Return only the template without any comments, unless you are not able to create
 
 When building the DOWNLOAD_FILENAME variable, use $LATEST_VER if the version starts with a 'v' (example: v0.4.2) and use $DPKG_VERSION if the version is just a version number (example: 0.4.2). 
 
+When building the INSTALL_FILES variable:
+    - Don't add "-v\$LATEST_VER" use only "-\$LATEST_VER".  
+    - If there is an empty folder (just a folder, without any sub item) delete it.
+
 There are a few available variables that are: 
 LATEST_VER=x.x.x The latest version retrieved for that package
 TARGET_ARCH=x86_64
 DPKG_ARCH=amd64
 DPKG_VERSION="\${LATEST_VER#v}"
+
+If in the INSTALL_FILES there is a "-v\$LATEST_VER", replace the "-v" and leave only "-".
+
 

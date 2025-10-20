@@ -2,7 +2,7 @@
 export SCRIPT_DIR=$(dirname "$(realpath "$0")")
 set -e
 
-
+FORCE=0
 source "$SCRIPT_DIR/scripts/functions.sh"
 source "$SCRIPT_DIR/scripts/pkg-common.sh"
 source "$SCRIPT_DIR/scripts/deb-updater.sh"
@@ -56,7 +56,7 @@ while getopts "ufVvhF:b:RD" opt; do
             echo "Error: -F requires a github repository name"
             exit 1
         fi
-        bash $SCRIPT_DIR/scripts/creator/formula_creator.sh "$OPTARG"
+        FORCE=$FORCE bash $SCRIPT_DIR/scripts/creator/formula_creator.sh "$OPTARG"
         exit 0
         ;;
     f)

@@ -1,0 +1,15 @@
+REPO="Byron/dua-cli"
+DPKG_BASENAME="dua"
+DOWNLOAD_FILENAME="dua-\$LATEST_VER-x86_64-unknown-linux-musl.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "dua-\$LATEST_VER-x86_64-unknown-linux-musl/dua|755|/usr/bin/dua"
+ "dua-\$LATEST_VER-x86_64-unknown-linux-musl/README.md|644|/usr/share/dua/README.md"
+ "dua-\$LATEST_VER-x86_64-unknown-linux-musl/LICENSE|644|/usr/share/dua/LICENSE"
+ "dua-\$LATEST_VER-x86_64-unknown-linux-musl/CHANGELOG.md|644|/usr/share/dua/CHANGELOG.md"
+)
+CLEANUP_FILES="dua-v\$LATEST_VER-x86_64-unknown-linux-musl/dua dua-v\$LATEST_VER-x86_64-unknown-linux-musl/README.md dua-v\$LATEST_VER-x86_64-unknown-linux-musl/LICENSE dua-v\$LATEST_VER-x86_64-unknown-linux-musl/CHANGELOG.md"
+PACKAGE_DESCRIPTION="dua is a command-line utility that helps you quickly view the size of files and directories, providing a more intuitive and faster way to manage disk usage."
+PACKAGE_SUMMARY="dua is a powerful disk usage analyzer"
+PACKAGE_LICENSE="MIT"
