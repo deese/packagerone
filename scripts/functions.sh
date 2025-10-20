@@ -1,4 +1,4 @@
-#SCRIPT_DIR=$(dirname "$(realpath "$0")")
+SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
 source "$SCRIPT_DIR/scripts/environ.sh"
 
 mkdir -p $OUTPUT_FOLDER $LOGFOLDER
@@ -213,4 +213,36 @@ downloader () {
     else
         echo "0"
     fi
+}
+
+
+# Print archive contents and a short tree of the build folder to aid troubleshooting
+print_archive_listing() {
+  # Avoid spamming: print only once per run
+  if [ -n "$_PRINTED_ARCHIVE" ]; then
+    return 0
+  fi
+  local archive="${BUILD_FOLDER:-}/$DOWNLOAD_FILENAME"
+  echo "[DEBUG] Build folder: ${BUILD_FOLDER:-<unset>}"
+  if [ -f "$archive" ]; then
+    echo "[DEBUG] Archive: $archive"
+    case "$archive" in
+      *.tar|*.tar.gz|*.tar.bz2|*.tar.xz|*.t?z)
+        tar -tf "$archive" 2>/dev/null | head -n 200 ;;
+      *.zip)
+        unzip -l "$archive" 2>/dev/null | head -n 200 ;;
+      *.gz)
+        gzip -l "$archive" 2>/dev/null || true ;;
+      *)
+        echo "[DEBUG] Unknown archive type"
+        ;;
+    esac
+  else
+    echo "[DEBUG] Archive file not found: $archive"
+  fi
+  #if [ -n "$BUILD_FOLDER" ] && [ -d "$BUILD_FOLDER" ]; then
+  #  echo "[DEBUG] Extracted files (top 200):"
+  #  (cd "$BUILD_FOLDER" && find . -maxdepth 4 -print 2>/dev/null | sort | head -n 200)
+  #fi
+  _PRINTED_ARCHIVE=1
 }

@@ -48,8 +48,11 @@ build_deb () {
         fi 
         if [ -f "$source" ]; then
             install -Dm"$perms" "$source" "${DPKG_DIR}$destination"
+        elif [ -d "$source" ]; then
+            install -d -Dm"$perms" "$source" "${DPKG_DIR}$destination"
         else
             echo "File doesn't exist: $source"
+            print_archive_listing
         fi
     done
 

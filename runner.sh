@@ -46,7 +46,7 @@ while getopts "ufVvhF:b:RD" opt; do
             echo "Error: -b requires a formula"
             exit 1
         fi
-        echo "Buil package $OPTARG"
+        echo "Build package $OPTARG"
 	    build_package "$OPTARG"
         exit 0
 		;;
