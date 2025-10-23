@@ -5,13 +5,13 @@ mkdir -p $OUTPUT_FOLDER $LOGFOLDER
 
 function read_env() {
   local filePath="${1:-.env}"
-  echo Loading environment  $filePath
+  logme -v Loading environment  $filePath
   if [ ! -f "$filePath" ]; then
-    echo "missing ${filePath}"
+    logme "missing ${filePath}"
     exit 1
   fi
 
-  echo "Reading $filePath"
+  logme -v "Reading $filePath"
   while IFS= read -r LINE || [ -n "$LINE" ]; do
     # Remove leading and trailing whitespaces, and carriage return
     CLEANED_LINE=$(echo "$LINE" | awk '{$1=$1};1' | tr -d '\r')

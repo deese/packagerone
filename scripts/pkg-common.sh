@@ -7,6 +7,8 @@ source "$CDIR/deb-builder.sh"
 # Common package building functions
 build_package() {
     local config_file="$1"
+    local build_failed=0
+    local rc=0
 
     # Source the configuration
     source "$config_file"
@@ -57,9 +59,9 @@ build_package() {
     logme "[PKGBUILD] Using build folder: $BUILD_FOLDER"
 
     logme -v "[PKGBUILD] Downloading file: $DOWNLOAD_URL"
-    
-    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"  ||  rc=$? 
-   
+    rc=0
+    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"  ||  rc=$?
+
     if [[ ! -z $rc && $rc -ne 0 ]]; then
         # [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" && ! -s "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
         logme "[PKGBUILD] Error downloading file (rc=$rc): $DOWNLOAD_URL"
@@ -91,11 +93,17 @@ build_package() {
     logme "[PKGBUILD] File extracted. Running builders"
 
     if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
-        build_deb
+        if ! build_deb; then
+            logme "[PKGBUILD] build_deb failed"
+            build_failed=1
+        fi
     fi
 
     if [ ${SKIP_RPM_PACKAGE:-0} -ne 1 ]; then
-        build_rpm
+        if ! build_rpm; then
+            logme "[PKGBUILD] build_rpm failed"
+            build_failed=1
+        fi
     fi
 
     # Cleanup
@@ -107,6 +115,11 @@ build_package() {
     rm -fr "${DPKG_DIR}" "$DOWNLOAD_FILENAME"
 
     # Update version tracking
+    if [[ $build_failed -ne 0 ]]; then
+        logme "[PKGBUILD] Build encountered errors. Skipping version update."
+        return 1
+    fi
+
     set_stored_version "$REPO" "$LATEST_VER"
     logme "[SUCCESS] Built $DPKG_BASENAME"
     echo 1 > "$CHANGES_FILE"

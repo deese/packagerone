@@ -82,7 +82,10 @@ EOF
      
     # Build package
     logme -v "[DEB] Running the builder"
-    fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}" >> $RUNLOG 2>&1
+    if ! fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}" >> "$RUNLOG" 2>&1; then
+        logme "[DEB] dpkg-deb failed. Check $RUNLOG"
+        return 1
+    fi
 
     # Cleanup
     #if [[ -n "$CLEANUP_FILES" ]]; then
@@ -90,9 +93,6 @@ EOF
     #fi
     #rm -fr "${DPKG_DIR}" "$DOWNLOAD_FILENAME"
 
-    # Update version tracking
-    set_stored_version "$REPO" "$LATEST_VER"
     logme "[DEB] Successfully built $DPKG_PATH"
-    echo 1 > "$CHANGES_FILE"
     return 0 
 }
