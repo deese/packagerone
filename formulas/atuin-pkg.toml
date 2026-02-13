@@ -17,11 +17,11 @@ os = "unknown-linux-gnu"
 extension = "tar.gz"
 extract_cmd = "tar zxf"
 bin_dest = "/usr/bin"
-share_dest = "/usr/share/atuin"
+share_dest = "/usr/share/{package_name}"
 
 [download]
 filename = "atuin-{arch}-{os}.{extension}"
-url_template = "https://github.com/{repo}/releases/download/{version}/{filename}"
+url_template = "https://github.com/{package_repo}/releases/download/{version}/{filename}"
 
 [[linux.install_files]]
 source = "atuin-{arch}-{os}/atuin"

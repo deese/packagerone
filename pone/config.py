@@ -40,4 +40,4 @@ RUNTIME = {}
 
 def get(section: str, default=None):
     """Get configuration value from environment variables."""
-    return os.environ.get(section.upper(), default)
+    return RUNTIME.get(section, default)
