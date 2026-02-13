@@ -1,0 +1,19 @@
+[package]
+repo = "jhspetersson/fselect"
+basename = "fselect"
+description = "fselect is a command line tool to select files and directories using Unix-like expressions and regular expressions. It offers a simple way to search for files based on attributes, content, and more."
+summary = "fselect is a powerful file selection tool"
+license = "MIT"
+
+[download]
+filename = "fselect-x86_64-linux-musl.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "gunzip"
+
+[[install_files]]
+source = "fselect-x86_64-linux-musl"
+permissions = "755"
+dest = "/usr/bin/fselect"
+
+[cleanup]
+files = "fselect"

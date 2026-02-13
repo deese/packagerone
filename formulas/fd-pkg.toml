@@ -1,0 +1,64 @@
+[package]
+repo = "sharkdp/fd"
+basename = "fd"
+description = "fd is a simple, fast and user-friendly alternative to 'find'. It provides a simple syntax to find files and directories, and the results are color-coded for easier differentiation. Its minimal design helps integrate seamlessly into shell pipelines."
+summary = "fd is a simple, fast and user-friendly alternative to 'find'"
+license = "Apache-2.0 / MIT"
+
+[download]
+filename = "fd-\{version}-x86_64-unknown-linux-gnu.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/fd"
+permissions = "755"
+dest = "/usr/bin/fd"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/CHANGELOG.md"
+permissions = "644"
+dest = "/usr/share/fd/CHANGELOG.md"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/LICENSE-APACHE"
+permissions = "644"
+dest = "/usr/share/fd/LICENSE-APACHE"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/LICENSE-MIT"
+permissions = "644"
+dest = "/usr/share/fd/LICENSE-MIT"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/README.md"
+permissions = "644"
+dest = "/usr/share/fd/README.md"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/autocomplete/fd.fish"
+permissions = "644"
+dest = "/usr/share/fd/autocomplete/fd.fish"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/autocomplete/_fd"
+permissions = "644"
+dest = "/usr/share/fd/autocomplete/_fd"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/autocomplete/fd.ps1"
+permissions = "644"
+dest = "/usr/share/fd/autocomplete/fd.ps1"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/autocomplete/fd.bash"
+permissions = "644"
+dest = "/usr/share/fd/autocomplete/fd.bash"
+
+[[install_files]]
+source = "fd-\{version}-x86_64-unknown-linux-gnu/fd.1"
+permissions = "644"
+dest = "/usr/share/fd/fd.1"
+
+[cleanup]
+files = "fd-\{version}-x86_64-unknown-linux-gnu"

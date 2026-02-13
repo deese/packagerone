@@ -1,0 +1,34 @@
+[package]
+repo = "Byron/dua-cli"
+basename = "dua"
+description = "dua is a command-line utility that helps you quickly view the size of files and directories, providing a more intuitive and faster way to manage disk usage."
+summary = "dua is a powerful disk usage analyzer"
+license = "MIT"
+
+[download]
+filename = "dua-\{version}-x86_64-unknown-linux-musl.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "dua-\{version}-x86_64-unknown-linux-musl/dua"
+permissions = "755"
+dest = "/usr/bin/dua"
+
+[[install_files]]
+source = "dua-\{version}-x86_64-unknown-linux-musl/README.md"
+permissions = "644"
+dest = "/usr/share/dua/README.md"
+
+[[install_files]]
+source = "dua-\{version}-x86_64-unknown-linux-musl/LICENSE"
+permissions = "644"
+dest = "/usr/share/dua/LICENSE"
+
+[[install_files]]
+source = "dua-\{version}-x86_64-unknown-linux-musl/CHANGELOG.md"
+permissions = "644"
+dest = "/usr/share/dua/CHANGELOG.md"
+
+[cleanup]
+files = "dua-v\{version}-x86_64-unknown-linux-musl/dua dua-v\{version}-x86_64-unknown-linux-musl/README.md dua-v\{version}-x86_64-unknown-linux-musl/LICENSE dua-v\{version}-x86_64-unknown-linux-musl/CHANGELOG.md"

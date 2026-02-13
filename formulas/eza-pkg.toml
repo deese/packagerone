@@ -1,0 +1,19 @@
+[package]
+repo = "eza-community/eza"
+basename = "eza"
+description = "eza is a modern alternative for the venerable file-listing command-line program ls that"
+summary = "eza is a modern alternative for ls"
+license = "MIT"
+
+[download]
+filename = "eza_\$TARGET_ARCH-unknown-linux-gnu.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "eza"
+permissions = "755"
+dest = "/usr/bin/eza"
+
+[cleanup]
+files = "eza"

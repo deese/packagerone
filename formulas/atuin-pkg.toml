@@ -1,0 +1,38 @@
+[package]
+repo = "atuinsh/atuin"
+name = "atuin"
+description = "atuin is a command-line tool that enhances the shell experience by providing historical tracking of commands, ensuring better organization and retrieval of the user's command history."
+summary = "atuin is a command-line tool for managing command history"
+license = "MIT"
+arch = "x86_64"
+
+[windows]
+os = "win32"
+extension = "zip"
+bin_dest = "C:\\Program Files\\{package_name}"
+share_dest = "C:\\Program Files\\{package_name}"
+
+[linux]
+os = "unknown-linux-gnu"
+extension = "tar.gz"
+extract_cmd = "tar zxf"
+bin_dest = "/usr/bin"
+share_dest = "/usr/share/atuin"
+
+[download]
+filename = "atuin-{arch}-{os}.{extension}"
+url_template = "https://github.com/{repo}/releases/download/{version}/{filename}"
+
+[[linux.install_files]]
+source = "atuin-{arch}-{os}/atuin"
+permissions = "755"
+dest = "{bin_dest}/atuin"
+
+[[linux.install_files]]
+base_path = "atuin-{arch}-{os}"
+source = [ "README.md", "CHANGELOG.md", "LICENSE" ]
+permissions = "644"
+dest = "{share_dest}"
+
+[cleanup]
+files = "atuin-{arch}-{os}"

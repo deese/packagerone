@@ -1,0 +1,17 @@
+[package]
+repo = "junegunn/fzf"
+basename = "fzf"
+description = "fzf is a general-purpose command-line fuzzy finder."
+
+[download]
+filename = "fzf-\$DPKG_VERSION-linux_\$DPKG_ARCH.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "fzf"
+permissions = "755"
+dest = "/usr/bin/fzf"
+
+[cleanup]
+files = "fzf"

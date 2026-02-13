@@ -1,0 +1,29 @@
+[package]
+repo = "gitleaks/gitleaks"
+basename = "gitleaks"
+description = "Gitleaks is a SAST tool for detecting hardcoded secrets like passwords, API keys, and tokens in your source code."
+summary = "Gitleaks is a tool for detecting hardcoded secrets"
+license = "MIT"
+
+[download]
+filename = "gitleaks_\${DPKG_VERSION}_linux_x64.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "gitleaks"
+permissions = "755"
+dest = "/usr/bin/gitleaks"
+
+[[install_files]]
+source = "LICENSE"
+permissions = "644"
+dest = "/usr/share/gitleaks/LICENSE"
+
+[[install_files]]
+source = "README.md"
+permissions = "644"
+dest = "/usr/share/gitleaks/README.md"
+
+[cleanup]
+files = "gitleaks LICENSE README.md"

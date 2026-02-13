@@ -1,0 +1,14 @@
+[package]
+repo = "helix-editor/helix"
+basename = "helix"
+description = "A Kakoune / Neovim inspired editor, written in Rust."
+
+[download]
+filename = "helix-\{version}-\$TARGET_ARCH.AppImage"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = ""
+
+[[install_files]]
+source = "\$DOWNLOAD_FILENAME"
+permissions = "755"
+dest = "/usr/bin/hx"

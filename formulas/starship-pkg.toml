@@ -1,0 +1,17 @@
+[package]
+repo = "starship/starship"
+basename = "starship"
+description = "The minimal, blazing-fast, and infinitely customizable prompt for any shell!"
+
+[download]
+filename = "starship-\$TARGET_ARCH-unknown-linux-gnu.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "starship"
+permissions = "755"
+dest = "/usr/bin/starship"
+
+[cleanup]
+files = "starship"

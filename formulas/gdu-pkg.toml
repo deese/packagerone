@@ -1,0 +1,19 @@
+[package]
+repo = "dundee/gdu"
+basename = "gdu"
+description = "gdu is a disk usage analyzer with an interactive interface written in Go. It provides a better overview of disk usage and allows managing storage space efficiently."
+summary = "gdu - Disk usage analyzer"
+license = "MIT"
+
+[download]
+filename = "gdu_linux_\$DPKG_ARCH.tgz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "gdu_linux_amd64"
+permissions = "755"
+dest = "/usr/bin/gdu"
+
+[cleanup]
+files = "gdu_linux_amd64"

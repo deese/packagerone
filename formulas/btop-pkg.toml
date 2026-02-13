@@ -1,0 +1,229 @@
+[package]
+repo = "aristocratos/btop"
+basename = "btop"
+description = "btop is a resource monitor that shows usage and stats for processor, memory, disks, network and processes. It provides an interactive terminal UI and is designed specifically for Linux, utilizing the musl C library for enhanced portability."
+summary = "btop - a resource monitor"
+license = "MIT"
+
+[download]
+filename = "btop-\$TARGET_ARCH-linux-musl.tbz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar xjf"
+
+[[install_files]]
+source = "btop/bin/btop"
+permissions = "755"
+dest = "/usr/bin/btop"
+
+[[install_files]]
+source = "btop/CHANGES.md"
+permissions = "644"
+dest = "/usr/share/btop/CHANGES.md"
+
+[[install_files]]
+source = "btop/install.sh"
+permissions = "755"
+dest = "/usr/share/btop/install.sh"
+
+[[install_files]]
+source = "btop/uninstall.sh"
+permissions = "755"
+dest = "/usr/share/btop/uninstall.sh"
+
+[[install_files]]
+source = "btop/btop.desktop"
+permissions = "644"
+dest = "/usr/share/btop/btop.desktop"
+
+[[install_files]]
+source = "btop/setuid.sh"
+permissions = "755"
+dest = "/usr/share/btop/setuid.sh"
+
+[[install_files]]
+source = "btop/Makefile"
+permissions = "644"
+dest = "/usr/share/btop/Makefile"
+
+[[install_files]]
+source = "btop/README.md"
+permissions = "644"
+dest = "/usr/share/btop/README.md"
+
+[[install_files]]
+source = "btop/themes/kanagawa-wave.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/kanagawa-wave.theme"
+
+[[install_files]]
+source = "btop/themes/everforest-dark-hard.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/everforest-dark-hard.theme"
+
+[[install_files]]
+source = "btop/themes/flat-remix.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/flat-remix.theme"
+
+[[install_files]]
+source = "btop/themes/adwaita.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/adwaita.theme"
+
+[[install_files]]
+source = "btop/themes/night-owl.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/night-owl.theme"
+
+[[install_files]]
+source = "btop/themes/dracula.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/dracula.theme"
+
+[[install_files]]
+source = "btop/themes/tomorrow-night.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/tomorrow-night.theme"
+
+[[install_files]]
+source = "btop/themes/kyli0x.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/kyli0x.theme"
+
+[[install_files]]
+source = "btop/themes/solarized_dark.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/solarized_dark.theme"
+
+[[install_files]]
+source = "btop/themes/gruvbox_dark_v2.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/gruvbox_dark_v2.theme"
+
+[[install_files]]
+source = "btop/themes/tokyo-night.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/tokyo-night.theme"
+
+[[install_files]]
+source = "btop/themes/adapta.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/adapta.theme"
+
+[[install_files]]
+source = "btop/themes/paper.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/paper.theme"
+
+[[install_files]]
+source = "btop/themes/tokyo-storm.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/tokyo-storm.theme"
+
+[[install_files]]
+source = "btop/themes/elementarish.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/elementarish.theme"
+
+[[install_files]]
+source = "btop/themes/dusklight.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/dusklight.theme"
+
+[[install_files]]
+source = "btop/themes/kanagawa-lotus.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/kanagawa-lotus.theme"
+
+[[install_files]]
+source = "btop/themes/horizon.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/horizon.theme"
+
+[[install_files]]
+source = "btop/themes/flat-remix-light.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/flat-remix-light.theme"
+
+[[install_files]]
+source = "btop/themes/monokai.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/monokai.theme"
+
+[[install_files]]
+source = "btop/themes/onedark.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/onedark.theme"
+
+[[install_files]]
+source = "btop/themes/gruvbox_material_dark.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/gruvbox_material_dark.theme"
+
+[[install_files]]
+source = "btop/themes/ayu.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/ayu.theme"
+
+[[install_files]]
+source = "btop/themes/matcha-dark-sea.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/matcha-dark-sea.theme"
+
+[[install_files]]
+source = "btop/themes/everforest-light-medium.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/everforest-light-medium.theme"
+
+[[install_files]]
+source = "btop/themes/HotPurpleTrafficLight.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/HotPurpleTrafficLight.theme"
+
+[[install_files]]
+source = "btop/themes/whiteout.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/whiteout.theme"
+
+[[install_files]]
+source = "btop/themes/gruvbox_dark.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/gruvbox_dark.theme"
+
+[[install_files]]
+source = "btop/themes/everforest-dark-medium.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/everforest-dark-medium.theme"
+
+[[install_files]]
+source = "btop/themes/solarized_light.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/solarized_light.theme"
+
+[[install_files]]
+source = "btop/themes/adwaita-dark.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/adwaita-dark.theme"
+
+[[install_files]]
+source = "btop/themes/gruvbox_light.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/gruvbox_light.theme"
+
+[[install_files]]
+source = "btop/themes/nord.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/nord.theme"
+
+[[install_files]]
+source = "btop/themes/greyscale.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/greyscale.theme"
+
+[[install_files]]
+source = "btop/themes/phoenix-night.theme"
+permissions = "644"
+dest = "/usr/share/btop/themes/phoenix-night.theme"
+
+[cleanup]
+files = "btop bin/btop btop/CHANGES.md btop/install.sh btop/uninstall.sh btop/btop.desktop btop/setuid.sh btop/Makefile btop/README.md btop/themes/kanagawa-wave.theme btop/themes/everforest-dark-hard.theme btop/themes/flat-remix.theme btop/themes/adwaita.theme btop/themes/night-owl.theme btop/themes/dracula.theme btop/themes/tomorrow-night.theme btop/themes/kyli0x.theme btop/themes/solarized_dark.theme btop/themes/gruvbox_dark_v2.theme btop/themes/tokyo-night.theme btop/themes/adapta.theme btop/themes/paper.theme btop/themes/tokyo-storm.theme btop/themes/elementarish.theme btop/themes/dusklight.theme btop/themes/kanagawa-lotus.theme btop/themes/horizon.theme btop/themes/flat-remix-light.theme btop/themes/monokai.theme btop/themes/onedark.theme btop/themes/gruvbox_material_dark.theme btop/themes/ayu.theme btop/themes/matcha-dark-sea.theme btop/themes/everforest-light-medium.theme btop/themes/HotPurpleTrafficLight.theme btop/themes/whiteout.theme btop/themes/gruvbox_dark.theme btop/themes/everforest-dark-medium.theme btop/themes/solarized_light.theme btop/themes/adwaita-dark.theme btop/themes/gruvbox_light.theme btop/themes/nord.theme btop/themes/greyscale.theme btop/themes/phoenix-night.theme"

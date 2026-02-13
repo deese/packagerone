@@ -1,0 +1,29 @@
+[package]
+repo = "bootandy/dust"
+basename = "dust"
+description = "dust is a more intuitive version of du (disk usage) that gives you an overview of your disk usage in a more human-friendly way."
+summary = "dust is a more user-friendly du command"
+license = "MIT"
+
+[download]
+filename = "dust-\{version}-x86_64-unknown-linux-gnu.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "dust-\{version}-x86_64-unknown-linux-gnu/dust"
+permissions = "755"
+dest = "/usr/bin/dust"
+
+[[install_files]]
+source = "dust-\{version}-x86_64-unknown-linux-gnu/LICENSE"
+permissions = "644"
+dest = "/usr/share/dust/LICENSE"
+
+[[install_files]]
+source = "dust-\{version}-x86_64-unknown-linux-gnu/README.md"
+permissions = "644"
+dest = "/usr/share/dust/README.md"
+
+[cleanup]
+files = "dust-v1.2.3-x86_64-unknown-linux-gnu/dust dust-v1.2.3-x86_64-unknown-linux-gnu/LICENSE dust-v1.2.3-x86_64-unknown-linux-gnu/README.md dust-v1.2.3-x86_64-unknown-linux-gnu"

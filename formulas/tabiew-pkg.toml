@@ -1,0 +1,19 @@
+[package]
+repo = "shshemi/tabiew"
+basename = "tabiew"
+description = "tabiew is a tool for viewing tabular data in the terminal. It provides an intuitive way to interact with and navigate data, making it more accessible and user-friendly."
+summary = "tabiew is a terminal tool for viewing tabular data"
+license = "MIT"
+
+[download]
+filename = "tw-x86_64-unknown-linux-gnu"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "cp"
+
+[[install_files]]
+source = "tw-x86_64-unknown-linux-gnu"
+permissions = "755"
+dest = "/usr/bin/tw"
+
+[cleanup]
+files = "tw"

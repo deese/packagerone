@@ -1,0 +1,79 @@
+[package]
+repo = "BurntSushi/ripgrep"
+basename = "ripgrep"
+description = "ripgrep is a line-oriented search tool that recursively searches your current directory for a regex pattern."
+summary = "ripgrep is a line-oriented search tool."
+license = "MIT"
+
+[download]
+filename = "ripgrep-\{version}-x86_64-unknown-linux-musl.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/rg"
+permissions = "755"
+dest = "/usr/bin/rg"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/COPYING"
+permissions = "644"
+dest = "/usr/share/ripgrep/COPYING"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/UNLICENSE"
+permissions = "644"
+dest = "/usr/share/ripgrep/UNLICENSE"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/doc/CHANGELOG.md"
+permissions = "644"
+dest = "/usr/share/ripgrep/doc/CHANGELOG.md"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/doc/FAQ.md"
+permissions = "644"
+dest = "/usr/share/ripgrep/doc/FAQ.md"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/doc/rg.1"
+permissions = "644"
+dest = "/usr/share/ripgrep/doc/rg.1"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/doc/GUIDE.md"
+permissions = "644"
+dest = "/usr/share/ripgrep/doc/GUIDE.md"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/LICENSE-MIT"
+permissions = "644"
+dest = "/usr/share/ripgrep/LICENSE-MIT"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/complete/_rg"
+permissions = "644"
+dest = "/usr/share/ripgrep/complete/_rg"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/complete/rg.fish"
+permissions = "644"
+dest = "/usr/share/ripgrep/complete/rg.fish"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/complete/_rg.ps1"
+permissions = "644"
+dest = "/usr/share/ripgrep/complete/_rg.ps1"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/complete/rg.bash"
+permissions = "644"
+dest = "/usr/share/ripgrep/complete/rg.bash"
+
+[[install_files]]
+source = "ripgrep-\{version}-x86_64-unknown-linux-musl/README.md"
+permissions = "644"
+dest = "/usr/share/ripgrep/README.md"
+
+[cleanup]
+files = "ripgrep-\{version}-x86_64-unknown-linux-musl"

@@ -1,0 +1,24 @@
+[package]
+repo = "astral-sh/uv"
+basename = "uv"
+description = "uv is a fast and minimalist command-line tool for managing your terminal emulator sessions."
+summary = "uv is a command-line tool for terminal session management"
+license = "MIT"
+
+[download]
+filename = "uv-x86_64-unknown-linux-gnu.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "uv-x86_64-unknown-linux-gnu/uv"
+permissions = "755"
+dest = "/usr/bin/uv"
+
+[[install_files]]
+source = "uv-x86_64-unknown-linux-gnu/uvx"
+permissions = "755"
+dest = "/usr/bin/uvx"
+
+[cleanup]
+files = "uv-x86_64-unknown-linux-gnu/uv uv-x86_64-unknown-linux-gnu/uvx uv-x86_64-unknown-linux-gnu"

@@ -1,0 +1,64 @@
+[package]
+repo = "sharkdp/bat"
+basename = "bat"
+description = "bat is a cat(1) clone with wings. It provides syntax highlighting,Git integration, and an array of other features that improve the experience of viewing source code."
+summary = "bat is a cat clone with syntax highlighting and Git integration"
+license = "MIT"
+
+[download]
+filename = "bat-\{version}-x86_64-unknown-linux-gnu.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/bat"
+permissions = "755"
+dest = "/usr/bin/bat"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/bat.1"
+permissions = "644"
+dest = "/usr/share/bat/bat.1"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/CHANGELOG.md"
+permissions = "644"
+dest = "/usr/share/bat/CHANGELOG.md"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/LICENSE-APACHE"
+permissions = "644"
+dest = "/usr/share/bat/LICENSE-APACHE"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/LICENSE-MIT"
+permissions = "644"
+dest = "/usr/share/bat/LICENSE-MIT"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/README.md"
+permissions = "644"
+dest = "/usr/share/bat/README.md"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/autocomplete/_bat.ps1"
+permissions = "644"
+dest = "/usr/share/bat/autocomplete/_bat.ps1"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/autocomplete/bat.fish"
+permissions = "644"
+dest = "/usr/share/bat/autocomplete/bat.fish"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/autocomplete/bat.bash"
+permissions = "644"
+dest = "/usr/share/bat/autocomplete/bat.bash"
+
+[[install_files]]
+source = "bat-\{version}-x86_64-unknown-linux-gnu/autocomplete/bat.zsh"
+permissions = "644"
+dest = "/usr/share/bat/autocomplete/bat.zsh"
+
+[cleanup]
+files = "bat-\{version}-x86_64-unknown-linux-gnu/bat bat-\{version}-x86_64-unknown-linux-gnu/bat.1 bat-\{version}-x86_64-unknown-linux-gnu/CHANGELOG.md bat-\{version}-x86_64-unknown-linux-gnu/LICENSE-APACHE bat-\{version}-x86_64-unknown-linux-gnu/LICENSE-MIT bat-\{version}-x86_64-unknown-linux-gnu/README.md bat-\{version}-x86_64-unknown-linux-gnu/autocomplete/_bat.ps1 bat-\{version}-x86_64-unknown-linux-gnu/autocomplete/bat.fish bat-\{version}-x86_64-unknown-linux-gnu/autocomplete/bat.bash bat-\{version}-x86_64-unknown-linux-gnu/autocomplete/bat.zsh"

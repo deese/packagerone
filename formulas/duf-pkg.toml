@@ -1,0 +1,29 @@
+[package]
+repo = "muesli/duf"
+basename = "duf"
+description = "duf is a disk usage/freespace tool that displays disk usage and free space in a simple and user-friendly way."
+summary = "duf - disk usage/freespace tool"
+license = "MIT"
+
+[download]
+filename = "duf_\$DPKG_VERSION_linux_\$TARGET_ARCH.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "duf"
+permissions = "755"
+dest = "/usr/bin/duf"
+
+[[install_files]]
+source = "LICENSE"
+permissions = "644"
+dest = "/usr/share/duf/LICENSE"
+
+[[install_files]]
+source = "README.md"
+permissions = "644"
+dest = "/usr/share/duf/README.md"
+
+[cleanup]
+files = "duf LICENSE README.md"

@@ -1,0 +1,19 @@
+[package]
+repo = "gokcehan/lf"
+basename = "lf"
+description = "lf is a terminal file manager that offers a simple and efficient alternative to other file managers"
+summary = "lf is a terminal file manager"
+license = "MIT"
+
+[download]
+filename = "lf-linux-\$DPKG_ARCH.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "lf"
+permissions = "755"
+dest = "/usr/bin/lf"
+
+[cleanup]
+files = "lf"

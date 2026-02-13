@@ -1,0 +1,44 @@
+[package]
+repo = "sharkdp/hexyl"
+basename = "hexyl"
+description = "hexyl is a command-line hex viewer with a rich feature set. It provides various view modes,"
+summary = "hexyl is a command-line hex viewer"
+license = "MIT"
+
+[download]
+filename = "hexyl-\{version}-x86_64-unknown-linux-gnu.tar.gz"
+url_template = "https://github.com/\{repo}/releases/download/\{version}/\{filename}"
+extract_cmd = "tar zxf"
+
+[[install_files]]
+source = "hexyl-v0.16.0-x86_64-unknown-linux-gnu/hexyl"
+permissions = "755"
+dest = "/usr/bin/hexyl"
+
+[[install_files]]
+source = "hexyl-v0.16.0-x86_64-unknown-linux-gnu/CHANGELOG.md"
+permissions = "644"
+dest = "/usr/share/hexyl/CHANGELOG.md"
+
+[[install_files]]
+source = "hexyl-v0.16.0-x86_64-unknown-linux-gnu/LICENSE-APACHE"
+permissions = "644"
+dest = "/usr/share/hexyl/LICENSE-APACHE"
+
+[[install_files]]
+source = "hexyl-v0.16.0-x86_64-unknown-linux-gnu/LICENSE-MIT"
+permissions = "644"
+dest = "/usr/share/hexyl/LICENSE-MIT"
+
+[[install_files]]
+source = "hexyl-v0.16.0-x86_64-unknown-linux-gnu/README.md"
+permissions = "644"
+dest = "/usr/share/hexyl/README.md"
+
+[[install_files]]
+source = "hexyl-v0.16.0-x86_64-unknown-linux-gnu/hexyl.1"
+permissions = "644"
+dest = "/usr/share/man/man1/hexyl.1"
+
+[cleanup]
+files = "hexyl-v0.16.0-x86_64-unknown-linux-gnu"
