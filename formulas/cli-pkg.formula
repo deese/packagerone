@@ -1,0 +1,14 @@
+REPO="cli/cli"
+DPKG_BASENAME="gh"
+DOWNLOAD_FILENAME="gh_\$DPKG_VERSION_linux_\$DPKG_ARCH.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "gh_\$DPKG_VERSION_linux_\$DPKG_ARCH/bin/gh|755|/usr/bin/gh"
+ "gh_\$DPKG_VERSION_linux_\$DPKG_ARCH/LICENSE|644|/usr/share/gh/LICENSE"
+ "gh_\$DPKG_VERSION_linux_\$DPKG_ARCH/share/man|755|/usr/share/gh/man"
+)
+CLEANUP_FILES="gh_\$DPKG_VERSION_linux_\$DPKG_ARCH"
+PACKAGE_DESCRIPTION="gh is the GitHub CLI. It brings GitHub to your terminal, allowing you to perform all GitHub operations directly from the command line."
+PACKAGE_SUMMARY="GitHub CLI tool"
+PACKAGE_LICENSE="MIT"

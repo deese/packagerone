@@ -1,0 +1,13 @@
+# -*- mode: sh -*-
+DPKG_BASENAME="ncdu"
+LATEST_VER="2.9.1"
+DOWNLOAD_FILENAME="ncdu-\$LATEST_VER-linux-x86_64.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://dev.yorhel.nl/download/\$DOWNLOAD_FILENAME" 
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+ "ncdu|755|/usr/bin/ncdu"
+)
+CLEANUP_FILES="ncdu"
+PACKAGE_DESCRIPTION="Ncdu is a disk usage analyzer with a text-mode user interface"
+PACKAGE_SUMMARY="Ncdu is a disk usage analyzer with a text-mode user interface. It is designed to find space hogs on a remote server where you don’t have an entire graphical setup available, but it is a useful tool even on regular desktop systems. Ncdu aims to be fast, simple, easy to use, and should be able to run on any POSIX-like system."
+PACKAGE_LICENSE="MIT"

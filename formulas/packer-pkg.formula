@@ -1,0 +1,16 @@
+# -*- mode: sh -*-
+FORMULA_TYPE="hashicorp"
+HASHICORP_PRODUCT="packer"
+DPKG_BASENAME="packer"
+HOMEPAGE="https://www.terraform.io"
+DOWNLOAD_FILENAME="\${HASHICORP_PRODUCT}_\${LATEST_VER}_linux_amd64.zip"
+DOWNLOAD_URL_TEMPLATE="https://releases.hashicorp.com/\${HASHICORP_PRODUCT}/\${LATEST_VER}/\${HASHICORP_PRODUCT}_\${LATEST_VER}_linux_amd64.zip"
+EXTRACT_CMD="unzip"
+INSTALL_FILES=(
+ "packer|755|/usr/bin/packer"
+ "LICENSE.txt|644|/usr/share/packer/LICENSE.txt"
+)
+CLEANUP_FILES="packer LICENSE.txt"
+PACKAGE_DESCRIPTION="Packer is lightweight, runs on every major operating system, and is highly performant, creating machine images for multiple platforms in parallel. Packer supports various platforms through external plugin integrations, the full list of which can be found at https://developer.hashicorp.com/packer/integrations."
+PACKAGE_SUMMARY="Packer is a tool for building identical machine images for multiple platforms from a single source configuration."
+PACKAGE_LICENSE="BSL-1.1"

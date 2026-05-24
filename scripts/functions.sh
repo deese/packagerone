@@ -1,17 +1,17 @@
-#SCRIPT_DIR=$(dirname "$(realpath "$0")")
+SCRIPT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")/..")"
 source "$SCRIPT_DIR/scripts/environ.sh"
 
 mkdir -p $OUTPUT_FOLDER $LOGFOLDER
 
 function read_env() {
   local filePath="${1:-.env}"
-  echo Loading environment  $filePath
+  logme -v Loading environment  $filePath
   if [ ! -f "$filePath" ]; then
-    echo "missing ${filePath}"
+    logme "missing ${filePath}"
     exit 1
   fi
 
-  echo "Reading $filePath"
+  logme -v "Reading $filePath"
   while IFS= read -r LINE || [ -n "$LINE" ]; do
     # Remove leading and trailing whitespaces, and carriage return
     CLEANED_LINE=$(echo "$LINE" | awk '{$1=$1};1' | tr -d '\r')
@@ -20,6 +20,29 @@ function read_env() {
       export "$CLEANED_LINE"
     fi
   done < "$filePath"
+}
+
+function get_latest_ver_hashicorp() {
+    local product="$1"
+    local result
+    result=$(curl -qsL "https://api.releases.hashicorp.com/v1/releases/${product}/latest" | jq -r '.version')
+    if [[ -z "$result" || "$result" == "null" ]]; then
+        echo "Could not get version for HashiCorp product: $product"
+        return 1
+    fi
+    echo "$result"
+}
+
+function get_latest_ver_html() {
+    local url="$1"
+    local regex="$2"
+    local result
+    result=$(curl -qsL "$url" | grep -oP "$regex" | head -1)
+    if [[ -z "$result" ]]; then
+        echo "Could not extract version from $url with regex: $regex"
+        return 1
+    fi
+    echo "$result"
 }
 
 function get_latest_ver () {
@@ -82,7 +105,7 @@ function set_stored_version() {
 }
 
 function var_substitution() {
-    VARS_TO_SUBST=(DOWNLOAD_FILENAME REPO DPKG_ARCH TARGET_ARCH DPKG_BASENAME LATEST_VER DPKG_VERSION)
+    VARS_TO_SUBST=(DOWNLOAD_FILENAME REPO DPKG_ARCH TARGET_ARCH DPKG_BASENAME LATEST_VER DPKG_VERSION HASHICORP_PRODUCT)
     RET="$1"
     shift
 
@@ -213,4 +236,36 @@ downloader () {
     else
         echo "0"
     fi
+}
+
+
+# Print archive contents and a short tree of the build folder to aid troubleshooting
+print_archive_listing() {
+  # Avoid spamming: print only once per run
+  if [ -n "$_PRINTED_ARCHIVE" ]; then
+    return 0
+  fi
+  local archive="${BUILD_FOLDER:-}/$DOWNLOAD_FILENAME"
+  echo "[DEBUG] Build folder: ${BUILD_FOLDER:-<unset>}"
+  if [ -f "$archive" ]; then
+    echo "[DEBUG] Archive: $archive"
+    case "$archive" in
+      *.tar|*.tar.gz|*.tar.bz2|*.tar.xz|*.t?z)
+        tar -tf "$archive" 2>/dev/null | head -n 200 ;;
+      *.zip)
+        unzip -l "$archive" 2>/dev/null | head -n 200 ;;
+      *.gz)
+        gzip -l "$archive" 2>/dev/null || true ;;
+      *)
+        echo "[DEBUG] Unknown archive type"
+        ;;
+    esac
+  else
+    echo "[DEBUG] Archive file not found: $archive"
+  fi
+  #if [ -n "$BUILD_FOLDER" ] && [ -d "$BUILD_FOLDER" ]; then
+  #  echo "[DEBUG] Extracted files (top 200):"
+  #  (cd "$BUILD_FOLDER" && find . -maxdepth 4 -print 2>/dev/null | sort | head -n 200)
+  #fi
+  _PRINTED_ARCHIVE=1
 }

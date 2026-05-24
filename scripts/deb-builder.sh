@@ -7,15 +7,8 @@ build_deb () {
     mkdir -p $OUTPUT_FOLDER/deb
 
     # Validate required variables
-    if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
+    if [[ -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
         logme "[DEB] Error: Missing required configuration variables"
-        exit 1
-    fi
-
-    # Get latest version
-    LATEST_VER=$(get_latest_ver "$REPO")
-    if [ $? -eq 1 ]; then
-        logme "[DEB] Fatal error: $LATEST_VER"
         exit 1
     fi
 
@@ -48,8 +41,11 @@ build_deb () {
         fi 
         if [ -f "$source" ]; then
             install -Dm"$perms" "$source" "${DPKG_DIR}$destination"
+        elif [ -d "$source" ]; then
+            install -d -Dm"$perms" "$source" "${DPKG_DIR}$destination"
         else
             echo "File doesn't exist: $source"
+            print_archive_listing
         fi
     done
 
@@ -63,7 +59,7 @@ Version: ${DPKG_VERSION}
 Section: utils
 Priority: optional
 Maintainer: ${MAINTAINER}
-Homepage: https://github.com/${REPO}
+Homepage: ${HOMEPAGE:-https://github.com/${REPO}}
 Architecture: ${DPKG_ARCH}
 Description: $_DESC
 EOF
@@ -79,7 +75,10 @@ EOF
      
     # Build package
     logme -v "[DEB] Running the builder"
-    fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}" >> $RUNLOG 2>&1
+    if ! fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}" >> "$RUNLOG" 2>&1; then
+        logme "[DEB] dpkg-deb failed. Check $RUNLOG"
+        return 1
+    fi
 
     # Cleanup
     #if [[ -n "$CLEANUP_FILES" ]]; then
@@ -87,9 +86,6 @@ EOF
     #fi
     #rm -fr "${DPKG_DIR}" "$DOWNLOAD_FILENAME"
 
-    # Update version tracking
-    set_stored_version "$REPO" "$LATEST_VER"
     logme "[DEB] Successfully built $DPKG_PATH"
-    echo 1 > "$CHANGES_FILE"
     return 0 
 }

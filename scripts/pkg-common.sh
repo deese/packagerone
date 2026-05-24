@@ -7,34 +7,80 @@ source "$CDIR/deb-builder.sh"
 # Common package building functions
 build_package() {
     local config_file="$1"
+    local build_failed=0
+    local rc=0
+
+    # Reset all formula variables before sourcing to prevent leakage between formulas
+    unset FORMULA_TYPE REPO HASHICORP_PRODUCT VERSION_URL VERSION_REGEX HOMEPAGE
+    unset DPKG_BASENAME DOWNLOAD_FILENAME DOWNLOAD_URL_TEMPLATE EXTRACT_CMD
+    unset INSTALL_FILES CLEANUP_FILES PACKAGE_DESCRIPTION PACKAGE_SUMMARY PACKAGE_LICENSE
 
     # Source the configuration
     source "$config_file"
 
     PAD_SIZE=$(( $(max_strlen line < <(grep ^REPO $SCRIPT_DIR/formulas/* | cut -f2 -d=)) * -1 ))
-    PAD_REPO=$(pad "$REPO" $PAD_SIZE)
+    PAD_REPO=$(pad "${REPO:-$DPKG_BASENAME}" $PAD_SIZE)
     logme -n "[PKGBUILD] Building $PAD_REPO"
 
     # Validate required variables
-    if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
+    local _ftype="${FORMULA_TYPE:-github}"
+    if [[ -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
         logme "\n[PKGBUILD] Error: Missing required configuration variables"
         exit 1
     fi
 
-    # Get latest version
-    LATEST_VER=$(get_latest_ver "$REPO")
-    if [ $? -eq 1 ]; then
-        logme "\n[PKGBUILD] Fatal error: $LATEST_VER"
-        exit 1
-    fi
+    # Get latest version based on formula type
+    local VERSION_KEY
+    case "$_ftype" in
+        github)
+            if [[ -z "$REPO" ]]; then
+                logme "\n[PKGBUILD] Error: github formula requires REPO"
+                exit 1
+            fi
+            LATEST_VER=$(get_latest_ver "$REPO")
+            if [ $? -eq 1 ]; then
+                logme "\n[PKGBUILD] Fatal error: $LATEST_VER"
+                exit 1
+            fi
+            VERSION_KEY="$REPO"
+            ;;
+        url_html)
+            if [[ -z "$VERSION_URL" || -z "$VERSION_REGEX" ]]; then
+                logme "\n[PKGBUILD] Error: url_html formula requires VERSION_URL and VERSION_REGEX"
+                exit 1
+            fi
+            LATEST_VER=$(get_latest_ver_html "$VERSION_URL" "$VERSION_REGEX")
+            if [[ $? -ne 0 || -z "$LATEST_VER" ]]; then
+                logme "\n[PKGBUILD] Fatal error: could not get version from $VERSION_URL"
+                exit 1
+            fi
+            VERSION_KEY="$DPKG_BASENAME"
+            ;;
+        hashicorp)
+            if [[ -z "$HASHICORP_PRODUCT" ]]; then
+                logme "\n[PKGBUILD] Error: hashicorp formula requires HASHICORP_PRODUCT"
+                exit 1
+            fi
+            LATEST_VER=$(get_latest_ver_hashicorp "$HASHICORP_PRODUCT")
+            if [[ $? -ne 0 || -z "$LATEST_VER" ]]; then
+                logme "\n[PKGBUILD] Fatal error: could not get version for HashiCorp product: $HASHICORP_PRODUCT"
+                exit 1
+            fi
+            VERSION_KEY="hashicorp/$HASHICORP_PRODUCT"
+            ;;
+        *)
+            logme "\n[PKGBUILD] Error: Unknown FORMULA_TYPE: $_ftype"
+            exit 1
+            ;;
+    esac
 
     # Check if already up to date
-    CURRENT_VERSION=$(get_stored_version "$REPO")
+    CURRENT_VERSION=$(get_stored_version "$VERSION_KEY")
     if [[ $FORCE -ne 1 && "$LATEST_VER" == "$CURRENT_VERSION" ]]; then
         logme " - Up to date ($CURRENT_VERSION)"
         return 0
     else
-      logme " - Building version: $CURRENT_VERSION"
+      logme " - Building version: $CURRENT_VERSION → $LATEST_VER"
     fi
 
 
@@ -57,13 +103,14 @@ build_package() {
     logme "[PKGBUILD] Using build folder: $BUILD_FOLDER"
 
     logme -v "[PKGBUILD] Downloading file: $DOWNLOAD_URL"
-    
-    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"  ||  rc=$? 
-   
+    rc=0
+    $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"  ||  rc=$?
+
     if [[ ! -z $rc && $rc -ne 0 ]]; then
         # [ ! -f "$BUILD_FOLDER/$DOWNLOAD_FILENAME" && ! -s "$BUILD_FOLDER/$DOWNLOAD_FILENAME" ]; then
         logme "[PKGBUILD] Error downloading file (rc=$rc): $DOWNLOAD_URL"
-        return  1
+        logme "[PKGBUILD] Skipping package due to download error"
+        return 1
     else
         logme -v "[PKGBUILD] File downloaded to $BUILD_FOLDER/$DOWNLOAD_FILENAME"
     fi
@@ -75,6 +122,8 @@ build_package() {
         if [[ "$EXTRACT_CMD" == *"tar"* ]]; then
             echo "Extracting to $BUILD_FOLDER"
             $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER"
+        elif [[ "$EXTRACT_CMD" == "unzip" ]]; then
+            unzip -o "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -d "$BUILD_FOLDER"
         elif [[ "$EXTRACT_CMD" == "cp" ]]; then
             #cp "$BUILD_FOLDER/$DOWNLOAD_FILENAME" "$BUILD_FOLDER"
             true
@@ -91,11 +140,17 @@ build_package() {
     logme "[PKGBUILD] File extracted. Running builders"
 
     if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
-        build_deb
+        if ! build_deb; then
+            logme "[PKGBUILD] build_deb failed"
+            build_failed=1
+        fi
     fi
 
     if [ ${SKIP_RPM_PACKAGE:-0} -ne 1 ]; then
-        build_rpm
+        if ! build_rpm; then
+            logme "[PKGBUILD] build_rpm failed"
+            build_failed=1
+        fi
     fi
 
     # Cleanup
@@ -107,7 +162,12 @@ build_package() {
     rm -fr "${DPKG_DIR}" "$DOWNLOAD_FILENAME"
 
     # Update version tracking
-    set_stored_version "$REPO" "$LATEST_VER"
+    if [[ $build_failed -ne 0 ]]; then
+        logme "[PKGBUILD] Build encountered errors. Skipping version update."
+        return 1
+    fi
+
+    set_stored_version "$VERSION_KEY" "$LATEST_VER"
     logme "[SUCCESS] Built $DPKG_BASENAME"
     echo 1 > "$CHANGES_FILE"
     return 0

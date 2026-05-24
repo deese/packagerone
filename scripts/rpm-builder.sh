@@ -23,7 +23,7 @@ build_rpm() {
     PACKAGE_SOURCES=""
     PACKAGE_FILES=""
     PACKAGE_DATE=$(date "+%a %b %d %Y")
-    PACKAGE_URL="https://github.com/$REPO"
+    PACKAGE_URL="${HOMEPAGE:-https://github.com/$REPO}"
 
     count=0
 	for entry in "${INSTALL_FILES[@]}"; do
@@ -32,14 +32,21 @@ build_rpm() {
         if [[ "$source" != "/"* ]]; then
             source="$BUILD_FOLDER/$source"
         fi
-        if [ -f "$source" ]; then 
-            cp $source $BUILD_FOLDER/rpmbuild/SOURCES/
+        if [ -f "$source" ] || [ -d "$source" ]; then
             PACKAGE_SOURCES="$PACKAGE_SOURCES\nSource$count:\t\t$source\n"
             PACKAGE_FILES="$PACKAGE_FILES%attr($perms, root, root) $destination\n"
-            INSTALL_CMDS="${INSTALL_CMDS}install -Dm$perms %{SOURCE$count}  %{buildroot}$destination\n"
+            if [ -f "$source" ]; then
+                cp $source $BUILD_FOLDER/rpmbuild/SOURCES/
+                INSTALL_CMDS="${INSTALL_CMDS}install -Dm$perms %{SOURCE$count}  %{buildroot}$destination\n"
+            else
+                cp -r $source $BUILD_FOLDER/rpmbuild/SOURCES/
+                INSTALL_CMDS="${INSTALL_CMDS}install -d -m$perms %{buildroot}$destination\n"
+                INSTALL_CMDS="${INSTALL_CMDS}cp -a %{SOURCE$count}/. %{buildroot}$destination/\n"
+            fi
             count=$((count + 1 ))
         else
             echo "File doesn't exist: $source"
+            print_archive_listing
         fi
   done
 
@@ -54,16 +61,20 @@ build_rpm() {
       rm -f "$i"
   done
 
+  logme -v "[RPM] Creating spec file"
   echo -e "$TEMPLATE" >  $BUILD_FOLDER/rpmbuild/SPECS/$PACKAGE_NAME.spec
 
+  logme -v "[RPM] Running rpmbuild"
   rpmbuild -bb $BUILD_FOLDER/rpmbuild/SPECS/$PACKAGE_NAME.spec --define "_topdir $BUILD_FOLDER/rpmbuild" --define "_rpmdir $OUTPUT_FOLDER/rpm" >> $RUNLOG 2>&1
-
 
   if [ $? -eq 0 ]; then
       RPM_PKG_NAME=$(ls $OUTPUT_FOLDER/rpm/$TARGET_ARCH/$PACKAGE_NAME*)
       logme "[RPM] Successfully built rpm package: $RPM_PKG_NAME"
+      return 0
+  else
+      logme "[RPM] rpmbuilduild failed. Check $RUNLOG"
+      return 1
   fi
 
 }
 #install -m 0755 %{SOURCE0} %{buildroot}/usr/bin/eza
-

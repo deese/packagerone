@@ -1,8 +1,8 @@
 REPO="aristocratos/btop"
 DPKG_BASENAME="btop"
-DOWNLOAD_FILENAME="btop-\$TARGET_ARCH-linux-musl.tbz"
+DOWNLOAD_FILENAME="btop-\$TARGET_ARCH-unknown-linux-musl.tar.gz"
 DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
-EXTRACT_CMD="tar xjf"
+EXTRACT_CMD="tar xf"
 INSTALL_FILES=(
  "btop/bin/btop|755|/usr/bin/btop"
  "btop/CHANGES.md|644|/usr/share/btop/CHANGES.md"
