@@ -23,7 +23,7 @@ build_rpm() {
     PACKAGE_SOURCES=""
     PACKAGE_FILES=""
     PACKAGE_DATE=$(date "+%a %b %d %Y")
-    PACKAGE_URL="https://github.com/$REPO"
+    PACKAGE_URL="${HOMEPAGE:-https://github.com/$REPO}"
 
     count=0
 	for entry in "${INSTALL_FILES[@]}"; do

@@ -7,15 +7,8 @@ build_deb () {
     mkdir -p $OUTPUT_FOLDER/deb
 
     # Validate required variables
-    if [[ -z "$REPO" || -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
+    if [[ -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
         logme "[DEB] Error: Missing required configuration variables"
-        exit 1
-    fi
-
-    # Get latest version
-    LATEST_VER=$(get_latest_ver "$REPO")
-    if [ $? -eq 1 ]; then
-        logme "[DEB] Fatal error: $LATEST_VER"
         exit 1
     fi
 
@@ -66,7 +59,7 @@ Version: ${DPKG_VERSION}
 Section: utils
 Priority: optional
 Maintainer: ${MAINTAINER}
-Homepage: https://github.com/${REPO}
+Homepage: ${HOMEPAGE:-https://github.com/${REPO}}
 Architecture: ${DPKG_ARCH}
 Description: $_DESC
 EOF

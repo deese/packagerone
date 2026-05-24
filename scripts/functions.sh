@@ -22,6 +22,29 @@ function read_env() {
   done < "$filePath"
 }
 
+function get_latest_ver_hashicorp() {
+    local product="$1"
+    local result
+    result=$(curl -qsL "https://api.releases.hashicorp.com/v1/releases/${product}/latest" | jq -r '.version')
+    if [[ -z "$result" || "$result" == "null" ]]; then
+        echo "Could not get version for HashiCorp product: $product"
+        return 1
+    fi
+    echo "$result"
+}
+
+function get_latest_ver_html() {
+    local url="$1"
+    local regex="$2"
+    local result
+    result=$(curl -qsL "$url" | grep -oP "$regex" | head -1)
+    if [[ -z "$result" ]]; then
+        echo "Could not extract version from $url with regex: $regex"
+        return 1
+    fi
+    echo "$result"
+}
+
 function get_latest_ver () {
 	if [[ ! -z $GITHUB_TOKEN ]]; then
 	   EXTRA_ARGS=(
@@ -82,7 +105,7 @@ function set_stored_version() {
 }
 
 function var_substitution() {
-    VARS_TO_SUBST=(DOWNLOAD_FILENAME REPO DPKG_ARCH TARGET_ARCH DPKG_BASENAME LATEST_VER DPKG_VERSION)
+    VARS_TO_SUBST=(DOWNLOAD_FILENAME REPO DPKG_ARCH TARGET_ARCH DPKG_BASENAME LATEST_VER DPKG_VERSION HASHICORP_PRODUCT)
     RET="$1"
     shift
 

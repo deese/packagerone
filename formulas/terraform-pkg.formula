@@ -1,0 +1,16 @@
+# -*- mode: sh -*-
+FORMULA_TYPE="hashicorp"
+HASHICORP_PRODUCT="terraform"
+DPKG_BASENAME="terraform"
+HOMEPAGE="https://www.terraform.io"
+DOWNLOAD_FILENAME="\${HASHICORP_PRODUCT}_\${LATEST_VER}_linux_amd64.zip"
+DOWNLOAD_URL_TEMPLATE="https://releases.hashicorp.com/\${HASHICORP_PRODUCT}/\${LATEST_VER}/\${HASHICORP_PRODUCT}_\${LATEST_VER}_linux_amd64.zip"
+EXTRACT_CMD="unzip"
+INSTALL_FILES=(
+ "terraform|755|/usr/bin/terraform"
+ "LICENSE.txt|644|/usr/share/terraform/LICENSE.txt"
+)
+CLEANUP_FILES="terraform LICENSE.txt"
+PACKAGE_DESCRIPTION="Terraform is an infrastructure as code tool that lets you define both cloud and on-prem resources in human-readable configuration files that you can version, reuse, and share."
+PACKAGE_SUMMARY="Infrastructure as Code tool by HashiCorp"
+PACKAGE_LICENSE="BSL-1.1"

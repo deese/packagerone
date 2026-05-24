@@ -39,6 +39,22 @@ trap cleanup EXIT
 
 read_env $SCRIPT_DIR/.env
 
+function resolve_formula {
+    local input="$1"
+    for candidate in \
+        "$input" \
+        "${input}-pkg.formula" \
+        "${input}.formula" \
+        "$SCRIPT_DIR/formulas/${input}-pkg.formula" \
+        "$SCRIPT_DIR/formulas/${input}.formula" \
+        "$SCRIPT_DIR/formulas/${input}"
+    do
+        [[ -f "$candidate" ]] && echo "$candidate" && return 0
+    done
+    echo "Error: no formula found for: $input" >&2
+    return 1
+}
+
 while getopts "ufVvhF:b:RD" opt; do
   case "$opt" in
     b)
@@ -46,10 +62,11 @@ while getopts "ufVvhF:b:RD" opt; do
             echo "Error: -b requires a formula"
             exit 1
         fi
-        echo "Build package $OPTARG"
-	    build_package "$OPTARG"
+        formula=$(resolve_formula "$OPTARG") || exit 1
+        echo "Build package $formula"
+        build_package "$formula"
         exit 0
-		;;
+        ;;
 
     F)
         if [[ -z "$OPTARG" ]]; then
@@ -102,7 +119,7 @@ if [[ $check_versions -eq 1 ]]; then
 fi
 
 for i in $SCRIPT_DIR/formulas/*.formula; do
-  build_package $i
+  build_package $i || logme "[ERROR] Failed to process formula: $i"
 done
 
 if [ -s $CHANGES_FILE ]; then
