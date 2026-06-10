@@ -34,6 +34,15 @@ HashiCorp official releases via releases.hashicorp.com.
 - If the version in the download URL starts with 'v' (example: v0.4.2) → use $LATEST_VER
 - If the version in the download URL has no leading 'v' (example: 0.4.2) → use $DPKG_VERSION
 
+## Rules for PACKAGE_SUMMARY
+- For github type: use the "Repo description" from the type context verbatim. If not provided, leave empty.
+- For other types: use a single-line concise description, maximum 80 characters.
+- Never invent or paraphrase.
+
+## Rules for PACKAGE_LICENSE
+- Must be a valid SPDX identifier (e.g. MIT, Apache-2.0, GPL-2.0-only, BSL-1.1)
+- If uncertain, use "unknown"
+
 ## Rules for INSTALL_FILES
 - Format per line: "path/to/file|permissions|destination"
 - Binary files → destination /usr/bin/
@@ -51,8 +60,9 @@ HashiCorp official releases via releases.hashicorp.com.
 ### github
 REPO="owner/repo"
 DPKG_BASENAME="name"
+HOMEPAGE="https://..."
 DOWNLOAD_FILENAME="..."
-DOWNLOAD_URL_TEMPLATE="https://github.com/$REPO/releases/download/$LATEST_VER/$DOWNLOAD_FILENAME"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
 EXTRACT_CMD="tar zxf"
 INSTALL_FILES=(
     "path|perms|destination"
@@ -65,6 +75,7 @@ PACKAGE_LICENSE="..."
 ### url_html
 FORMULA_TYPE="url_html"
 DPKG_BASENAME="name"
+HOMEPAGE="https://..."
 VERSION_URL="https://..."
 VERSION_REGEX='...'
 DOWNLOAD_FILENAME="..."

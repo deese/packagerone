@@ -8,10 +8,12 @@ $ tar tvf eza_x86_64-unknown-linux-gnu.tar.gz
 -rwxr-xr-x ces/users   2282480 2025-05-30 16:04 ./eza
 Formula type: github
 Type context: REPO: eza-community/eza
+Repo description: A modern replacement for ls
 Output:
 # -*- mode: sh -*-
 REPO="eza-community/eza"
 DPKG_BASENAME="eza"
+HOMEPAGE="https://eza.rocks"
 DOWNLOAD_FILENAME="eza_\$TARGET_ARCH-unknown-linux-gnu.tar.gz"
 DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
 EXTRACT_CMD="tar zxf"
@@ -20,7 +22,7 @@ INSTALL_FILES=(
 )
 CLEANUP_FILES="eza"
 PACKAGE_DESCRIPTION="eza is a modern alternative for the venerable file-listing command-line program ls."
-PACKAGE_SUMMARY="eza is a modern alternative for ls"
+PACKAGE_SUMMARY="A modern replacement for ls"
 PACKAGE_LICENSE="MIT"
 ### END EXAMPLE 1 ###
 
@@ -33,9 +35,11 @@ tar tvf fzf-0.62.0-linux_amd64.tar.gz
 -rw-r--r-- jg/staff    3883008 2025-05-04 11:59 fzf-0.62.0-linux_amd64/extra/fzf.extra
 Formula type: github
 Type context: REPO: junegunn/fzf
+Repo description: A command-line fuzzy finder
 Output:
 REPO="junegunn/fzf"
 DPKG_BASENAME="fzf"
+HOMEPAGE="https://github.com/junegunn/fzf"
 DOWNLOAD_FILENAME="fzf-\$DPKG_VERSION-linux_\$DPKG_ARCH.tar.gz"
 DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
 EXTRACT_CMD="tar zxf"
@@ -45,7 +49,7 @@ INSTALL_FILES=(
     )
 CLEANUP_FILES="fzf extra/fzf.extra extra"
 PACKAGE_DESCRIPTION="fzf is a general-purpose command-line fuzzy finder."
-PACKAGE_SUMMARY="fzf is a general-purpose command-line fuzzy finder"
+PACKAGE_SUMMARY="A command-line fuzzy finder"
 PACKAGE_LICENSE="MIT"
 ### END EXAMPLE 2 ###
 
@@ -61,6 +65,7 @@ Output:
 # -*- mode: sh -*-
 FORMULA_TYPE="url_html"
 DPKG_BASENAME="ncdu"
+HOMEPAGE="https://dev.yorhel.nl/ncdu"
 VERSION_URL="https://dev.yorhel.nl/ncdu"
 VERSION_REGEX='ncdu-\K[0-9]+\.[0-9]+\.[0-9]+(?=-linux-x86_64\.tar\.gz)'
 DOWNLOAD_FILENAME="ncdu-\$LATEST_VER-linux-x86_64.tar.gz"

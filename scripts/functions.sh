@@ -22,6 +22,57 @@ function read_env() {
   done < "$filePath"
 }
 
+function get_repo_license() {
+    local repo="$1"
+    local extra_args=()
+
+    if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+        extra_args=(
+            -H "Authorization: Bearer $GITHUB_TOKEN"
+            -H "Accept: application/vnd.github+json"
+        )
+    fi
+
+    local result
+    result=$(curl "${extra_args[@]}" -qs "https://api.github.com/repos/${repo}" \
+        | jq -r '.license.spdx_id // empty')
+
+    if [[ -n "$result" && "$result" != "NOASSERTION" ]]; then
+        echo "$result"
+        return 0
+    fi
+    return 1
+}
+
+function resolve_package_license() {
+    local formula_file="${1:-}"
+
+    if [[ -n "${PACKAGE_LICENSE:-}" ]]; then
+        echo "$PACKAGE_LICENSE"
+        return 0
+    fi
+
+    if [[ -n "${REPO:-}" ]]; then
+        local license
+        if license=$(get_repo_license "$REPO") && [[ -n "$license" ]]; then
+            logme "[NFPM] License for ${REPO}: ${license}"
+            [[ -n "$formula_file" ]] && echo "PACKAGE_LICENSE=\"${license}\"" >> "$formula_file"
+            PACKAGE_LICENSE="$license"
+            echo "$license"
+            return 0
+        fi
+    fi
+
+    local user_license
+    printf '[NFPM] License not found for %s. Enter SPDX identifier (e.g. MIT, Apache-2.0): ' "$DPKG_BASENAME" >/dev/tty
+    read -r user_license < /dev/tty
+    [[ -z "$user_license" ]] && user_license="unknown"
+    [[ -n "$formula_file" ]] && echo "PACKAGE_LICENSE=\"${user_license}\"" >> "$formula_file"
+    PACKAGE_LICENSE="$user_license"
+    echo "$user_license"
+    return 0
+}
+
 function get_latest_ver_hashicorp() {
     local product="$1"
     local result
@@ -51,22 +102,31 @@ function get_latest_ver () {
             -H "Authorization: Bearer $GITHUB_TOKEN"
             -H "Accept: application/vnd.github+json"
 	   )
-	   #EXTRA_ARGS="-H \"Authorization: Bearer $GITHUB_TOKEN\" -H \"Accept: application/vnd.github+json\""
 	else
-           EXTRA_ARGS=() #""
+           EXTRA_ARGS=()
         fi
 	OUTPUT=$(curl "${EXTRA_ARGS[@]}" -qs https://api.github.com/repos/$1/releases/latest)
-	if [[ "$OUTPUT" == *"API rate limit exceeded for"* ]]; then
-	  echo "Github API exceeded. Try later."
+	if [[ "$OUTPUT" == *"API rate limit exceeded for"* || "$OUTPUT" == *"secondary rate limit"* ]]; then
+	  echo "Github API rate limit exceeded. Try later."
 	  return 1
 	fi
     if [ ! -z $2 ]; then
         TAG_NAME=$(echo "$OUTPUT"| jq -r '.tag_name')
         REL_DATE=$(echo "$OUTPUT"| jq -r '.published_at')
+        if [[ -z "$TAG_NAME" || "$TAG_NAME" == "null" ]]; then
+            echo "Could not get tag_name from GitHub API for $1"
+            return 1
+        fi
         echo $TAG_NAME $REL_DATE
         return 0
     fi
-	echo "$OUTPUT"| jq -r '.tag_name'
+    local tag_name
+    tag_name=$(echo "$OUTPUT" | jq -r '.tag_name')
+    if [[ -z "$tag_name" || "$tag_name" == "null" ]]; then
+        echo "Could not get tag_name from GitHub API for $1 (response: $(echo "$OUTPUT" | jq -r '.message // "unknown error"'))"
+        return 1
+    fi
+	echo "$tag_name"
 	return 0
 }
 

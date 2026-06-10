@@ -1,0 +1,14 @@
+REPO="deese/ssler"
+DPKG_BASENAME="ssler"
+HOMEPAGE="https://github.com/deese/ssler"
+DOWNLOAD_FILENAME="ssler-linux-amd64.zip"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="unzip"
+INSTALL_FILES=(
+    "dist/ssler-linux-amd64|755|/usr/bin/ssler"
+)
+CLEANUP_FILES="dist/ssler-linux-amd64 dist"
+PACKAGE_DESCRIPTION="ssler is a command-line SSL/TLS certificate inspection tool."
+PACKAGE_SUMMARY=""
+PACKAGE_LICENSE="unknown"
+PACKAGE_SUMMARY="ssler is a command-line SSL/TLS certificate inspection tool."

@@ -1,0 +1,18 @@
+REPO="goreleaser/nfpm"
+DPKG_BASENAME="nfpm"
+DOWNLOAD_FILENAME="nfpm_\${DPKG_VERSION}_Linux_x86_64.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+    "nfpm|755|/usr/bin/nfpm"
+    "LICENSE.md|644|/usr/share/nfpm/LICENSE.md"
+    "README.md|644|/usr/share/nfpm/README.md"
+    "completions/nfpm.bash|644|/usr/share/nfpm/completions/nfpm.bash"
+    "completions/nfpm.fish|644|/usr/share/nfpm/completions/nfpm.fish"
+    "completions/nfpm.zsh|644|/usr/share/nfpm/completions/nfpm.zsh"
+    "manpages/nfpm.1.gz|644|/usr/share/nfpm/manpages/nfpm.1.gz"
+)
+CLEANUP_FILES="nfpm LICENSE.md README.md completions/nfpm.bash completions/nfpm.fish completions/nfpm.zsh completions manpages/nfpm.1.gz manpages"
+PACKAGE_DESCRIPTION="nfpm is a simple, 0-dependencies deb, rpm, apk, ipk, and arch linux packager written in Go."
+PACKAGE_SUMMARY="Simple cross-format Linux package builder"
+PACKAGE_LICENSE="MIT"
