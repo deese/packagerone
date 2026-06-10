@@ -12,3 +12,4 @@ PACKAGE_DESCRIPTION="fzf is a general-purpose command-line fuzzy finder.
   git commits, etc. It implements a \"fuzzy\" matching algorithm, so you can quickly type in patterns with omitted
   characters and still get the results you want."
 
+PACKAGE_LICENSE="MIT"

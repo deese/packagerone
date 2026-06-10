@@ -15,3 +15,4 @@ PACKAGE_DESCRIPTION="The minimal, blazing-fast, and infinitely customizable prom
 	Feature rich: support for all your favorite tools.
 	Easy: quick to install – start using it in minutes"
 
+PACKAGE_LICENSE="ISC"

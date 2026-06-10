@@ -3,6 +3,7 @@ CDIR=$(dirname -- "${BASH_SOURCE[0]}")
 source "$CDIR/functions.sh"
 source "$CDIR/rpm-builder.sh"
 source "$CDIR/deb-builder.sh"
+source "$CDIR/nfpm-builder.sh"
 
 # Common package building functions
 build_package() {
@@ -14,6 +15,7 @@ build_package() {
     unset FORMULA_TYPE REPO HASHICORP_PRODUCT VERSION_URL VERSION_REGEX HOMEPAGE
     unset DPKG_BASENAME DOWNLOAD_FILENAME DOWNLOAD_URL_TEMPLATE EXTRACT_CMD
     unset INSTALL_FILES CLEANUP_FILES PACKAGE_DESCRIPTION PACKAGE_SUMMARY PACKAGE_LICENSE
+    unset LATEST_VER DPKG_VERSION DPKG_DIR DPKG_NAME DPKG_PATH PACKAGE_VERSION
 
     # Source the configuration
     source "$config_file"
@@ -38,7 +40,7 @@ build_package() {
                 exit 1
             fi
             LATEST_VER=$(get_latest_ver "$REPO")
-            if [ $? -eq 1 ]; then
+            if [[ $? -ne 0 ]]; then
                 logme "\n[PKGBUILD] Fatal error: $LATEST_VER"
                 exit 1
             fi
@@ -91,7 +93,7 @@ build_package() {
     fi
 
     # Setup package variables
-    DPKG_VERSION="${LATEST_VER#v}"
+    DPKG_VERSION=$(echo "${LATEST_VER}" | sed 's/^[^0-9]*//')
     DPKG_DIR="${DPKG_BASENAME}-${LATEST_VER}-${TARGET_ARCH}"
     DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
     DPKG_PATH="./$OUTPUT_FOLDER/$DPKG_NAME"
@@ -139,27 +141,35 @@ build_package() {
 
     logme "[PKGBUILD] File extracted. Running builders"
 
-    if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
-        if ! build_deb; then
-            logme "[PKGBUILD] build_deb failed"
+    if [[ "${USE_NFPM:-0}" -eq 1 ]]; then
+        if ! build_nfpm "$config_file"; then
+            logme "[PKGBUILD] build_nfpm failed"
             build_failed=1
+        fi
+    else
+        if [ ${SKIP_DEB_PACKAGE:-0} -ne 1 ]; then
+            if ! build_deb; then
+                logme "[PKGBUILD] build_deb failed"
+                build_failed=1
+            fi
+        fi
+
+        if [ ${SKIP_RPM_PACKAGE:-0} -ne 1 ]; then
+            if ! build_rpm; then
+                logme "[PKGBUILD] build_rpm failed"
+                build_failed=1
+            fi
         fi
     fi
 
-    if [ ${SKIP_RPM_PACKAGE:-0} -ne 1 ]; then
-        if ! build_rpm; then
-            logme "[PKGBUILD] build_rpm failed"
-            build_failed=1
-        fi
-    fi
-
-    # Cleanup
+    # Cleanup (paths are relative to BUILD_FOLDER, not $PWD)
     if [[ -n "$CLEANUP_FILES" ]]; then
         logme -v "[PKGBUILD] Cleaning up files."
-        rm -fr $CLEANUP_FILES
+        for _cf in $CLEANUP_FILES; do
+            _cf=$(var_substitution "$_cf")
+            rm -fr "${BUILD_FOLDER}/${_cf}"
+        done
     fi
-
-    rm -fr "${DPKG_DIR}" "$DOWNLOAD_FILENAME"
 
     # Update version tracking
     if [[ $build_failed -ne 0 ]]; then

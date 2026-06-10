@@ -12,7 +12,6 @@ INSTALL_FILES=(
  "fd-\$LATEST_VER-x86_64-unknown-linux-gnu/README.md|644|/usr/share/fd/README.md"
  "fd-\$LATEST_VER-x86_64-unknown-linux-gnu/autocomplete/fd.fish|644|/usr/share/fd/autocomplete/fd.fish"
  "fd-\$LATEST_VER-x86_64-unknown-linux-gnu/autocomplete/_fd|644|/usr/share/fd/autocomplete/_fd"
- "fd-\$LATEST_VER-x86_64-unknown-linux-gnu/autocomplete/fd.ps1|644|/usr/share/fd/autocomplete/fd.ps1"
  "fd-\$LATEST_VER-x86_64-unknown-linux-gnu/autocomplete/fd.bash|644|/usr/share/fd/autocomplete/fd.bash"
  "fd-\$LATEST_VER-x86_64-unknown-linux-gnu/fd.1|644|/usr/share/fd/fd.1"
 )

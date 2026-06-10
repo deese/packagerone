@@ -55,46 +55,20 @@ function resolve_formula {
     return 1
 }
 
+FORMULA_TO_BUILD=""
+FORMULA_TO_CREATE=""
+DO_UPLOAD=0
+
 while getopts "ufVvhF:b:RD" opt; do
   case "$opt" in
-    b)
-        if [[ -z "$OPTARG" ]]; then
-            echo "Error: -b requires a formula"
-            exit 1
-        fi
-        formula=$(resolve_formula "$OPTARG") || exit 1
-        echo "Build package $formula"
-        build_package "$formula"
-        exit 0
-        ;;
-
-    F)
-        if [[ -z "$OPTARG" ]]; then
-            echo "Error: -F requires a github repository name"
-            exit 1
-        fi
-        FORCE=$FORCE bash $SCRIPT_DIR/scripts/creator/formula_creator.sh "$OPTARG"
-        exit 0
-        ;;
-    f)
-      FORCE=1
-      ;;
-    V)
-      check_versions=1
-      ;;
-    v)
-      VERBOSE=1
-      ;;
-    u)
-       do_upload
-       exit 0
-       ;;
-    R)
-      SKIP_RPM_PACKAGE=1
-      ;;
-    D)
-      SKIP_DEB_PACKAGE=1
-      ;;
+    b) FORMULA_TO_BUILD="$OPTARG" ;;
+    F) FORMULA_TO_CREATE="$OPTARG" ;;
+    f) FORCE=1 ;;
+    V) check_versions=1 ;;
+    v) VERBOSE=1 ;;
+    u) DO_UPLOAD=1 ;;
+    R) SKIP_RPM_PACKAGE=1 ;;
+    D) SKIP_DEB_PACKAGE=1 ;;
     *)
       echo "Usage: $0 [-V] [-v] [-f] [-R] [-D]"
       echo "-----"
@@ -111,6 +85,23 @@ while getopts "ufVvhF:b:RD" opt; do
       ;;
   esac
 done
+
+if [[ -n "$FORMULA_TO_CREATE" ]]; then
+    FORCE=$FORCE bash $SCRIPT_DIR/scripts/creator/formula_creator.sh "$FORMULA_TO_CREATE"
+    exit 0
+fi
+
+if [[ -n "$FORMULA_TO_BUILD" ]]; then
+    formula=$(resolve_formula "$FORMULA_TO_BUILD") || exit 1
+    echo "Build package $formula"
+    build_package "$formula"
+    exit 0
+fi
+
+if [[ "$DO_UPLOAD" -eq 1 ]]; then
+    do_upload
+    exit 0
+fi
 
 if [[ $check_versions -eq 1 ]]; then
   echo "Checking versions..."

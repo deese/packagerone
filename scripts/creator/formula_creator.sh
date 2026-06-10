@@ -106,12 +106,27 @@ function download_latest_gh {
 function get_download_links {
     stderr "Retrieving links"
 
-    jq -r '.assets[] | select(.name | test("(?=.*linux)(?=.*x86_64).*")) | .browser_download_url' $LATEST_FILE > $DOWNLOAD_LINKS
-    jq -r '.assets[] | select(.name | test("(?=.*linux)(?=.*amd64).*")) | .browser_download_url' $LATEST_FILE >> $DOWNLOAD_LINKS
+    jq -r '.assets[] | select(.name | test("(?=.*linux)(?=.*x86_64).*"; "i")) | .browser_download_url' $LATEST_FILE > $DOWNLOAD_LINKS
+    jq -r '.assets[] | select(.name | test("(?=.*linux)(?=.*amd64).*"; "i")) | .browser_download_url' $LATEST_FILE >> $DOWNLOAD_LINKS
 
     if [[ ! -s "$DOWNLOAD_LINKS" ]]; then
-        jq -r '.assets[] | select(.name | test(".*linux.*")) | .browser_download_url' $LATEST_FILE >> $DOWNLOAD_LINKS
+        jq -r '.assets[] | select(.name | test(".*linux.*"; "i")) | .browser_download_url' $LATEST_FILE >> $DOWNLOAD_LINKS
     fi
+}
+
+function get_github_repo_description {
+    local repo="$1"
+    local extra_args=()
+
+    if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+        extra_args=(
+            -H "Authorization: Bearer $GITHUB_TOKEN"
+            -H "Accept: application/vnd.github+json"
+        )
+    fi
+
+    curl "${extra_args[@]}" -qs "https://api.github.com/repos/${repo}" \
+        | jq -r '.description // empty'
 }
 
 function get_repo_data {
@@ -120,6 +135,10 @@ function get_repo_data {
     get_download_links
 
     PROMPT_LINKS="$(<$DOWNLOAD_LINKS)"
+    if [[ -z "$PROMPT_LINKS" ]]; then
+        stderr "Error: no download links found for $1"
+        return 1
+    fi
     if [[ $(echo -e "$PROMPT_LINKS"|wc -l) -eq 1 ]]; then
         stderr "Only one link found."
         echo "$PROMPT_LINKS"
@@ -245,6 +264,76 @@ Select the best link for a static Linux x86_64 binary. Prefer x86_64 over amd64,
     stderr "Selected download link: $DOWNLOAD_LINK"
 }
 
+# ── License / Summary resolution ─────────────────────────────────────────────
+
+function fetch_github_license {
+    local repo="$1"
+    local extra_args=()
+
+    if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+        extra_args=(
+            -H "Authorization: Bearer $GITHUB_TOKEN"
+            -H "Accept: application/vnd.github+json"
+        )
+    fi
+
+    local result
+    result=$(curl "${extra_args[@]}" -qs "https://api.github.com/repos/${repo}" \
+        | jq -r '.license.spdx_id // empty')
+
+    if [[ -n "$result" && "$result" != "NOASSERTION" ]]; then
+        echo "$result"
+        return 0
+    fi
+    return 1
+}
+
+function ensure_license {
+    local formula_text="$1"
+    local formula_type="${2:-github}"
+
+    if echo "$formula_text" | grep -qE '^PACKAGE_LICENSE=".+"'; then
+        echo "$formula_text"
+        return 0
+    fi
+
+    local license=""
+
+    if [[ "$formula_type" == "github" && -n "${REPO:-}" ]]; then
+        stderr "Fetching license from GitHub for $REPO..."
+        license=$(fetch_github_license "$REPO") || true
+    fi
+
+    if [[ -z "$license" ]]; then
+        read -r -p "License not found. Enter SPDX identifier (e.g. MIT, Apache-2.0): " license </dev/tty
+        [[ -z "$license" ]] && license="unknown"
+    else
+        stderr "License resolved from GitHub: $license"
+    fi
+
+    echo "$formula_text"
+    echo "PACKAGE_LICENSE=\"${license}\""
+}
+
+function ensure_summary {
+    local formula_text="$1"
+
+    if echo "$formula_text" | grep -qE '^PACKAGE_SUMMARY=".+"'; then
+        echo "$formula_text"
+        return 0
+    fi
+
+    local desc_line summary
+    desc_line=$(echo "$formula_text" | grep '^PACKAGE_DESCRIPTION=')
+    summary=$(echo "$desc_line" | sed 's/^PACKAGE_DESCRIPTION="//;s/"$//' | head -1)
+
+    echo "$formula_text"
+    if [[ -n "$summary" ]]; then
+        stderr "Using first line of PACKAGE_DESCRIPTION as PACKAGE_SUMMARY"
+        echo "PACKAGE_SUMMARY=\"${summary}\""
+    fi
+}
+
 # ── AI ────────────────────────────────────────────────────────────────────────
 
 function query_ai {
@@ -328,7 +417,10 @@ case "$FORMULA_TYPE" in
             echo "$DOWNLOAD_LINK"
             exit 1
         fi
+        REPO_DESCRIPTION=$(get_github_repo_description "$REPO")
         TYPE_CONTEXT="REPO: $REPO"
+        [[ -n "$REPO_DESCRIPTION" ]] && TYPE_CONTEXT+="
+Repo description: $REPO_DESCRIPTION"
         ;;
 
     hashicorp)
@@ -397,6 +489,9 @@ USER_TEMPLATE=$(var_substitution "$USER_TEMPLATE")
 
 DATA=$(query_ai "$SYSTEM_PROMPT" "$USER_TEMPLATE")
 FORMULA=$(echo "$DATA" | jq -r '.choices[0].message.content')
+
+FORMULA=$(ensure_license "$FORMULA" "$FORMULA_TYPE")
+FORMULA=$(ensure_summary "$FORMULA")
 
 echo "File listing"
 echo "============"

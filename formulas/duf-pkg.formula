@@ -6,10 +6,9 @@ DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/
 EXTRACT_CMD="tar zxf"
 INSTALL_FILES=(
  "duf|755|/usr/bin/duf"
- "LICENSE|644|/usr/share/duf/LICENSE"
- "README.md|644|/usr/share/duf/README.md"
+ "duf.1|644|/usr/share/man/man1/duf.1"
 )
-CLEANUP_FILES="duf LICENSE README.md"
+CLEANUP_FILES="duf duf.1"
 PACKAGE_DESCRIPTION="duf is a disk usage/freespace tool that displays disk usage and free space in a simple and user-friendly way."
 PACKAGE_SUMMARY="duf - disk usage/freespace tool"
 PACKAGE_LICENSE="MIT"

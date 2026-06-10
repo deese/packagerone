@@ -13,3 +13,4 @@ PACKAGE_DESCRIPTION="Neovim is a project that seeks to aggressively refactor Vim
 	Maximize extensibility
 	See the Introduction wiki page and Roadmap for more information."
 
+PACKAGE_LICENSE="unknown"

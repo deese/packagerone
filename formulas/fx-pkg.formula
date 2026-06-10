@@ -7,3 +7,4 @@ INSTALL_FILES=(
     "\$DOWNLOAD_FILENAME|755|/usr/bin/fx"
 )
 PACKAGE_DESCRIPTION="Fx is a CLI for JSON: it shows JSON interactively in your terminal, and lets you transform JSON with JavaScript. Fx is written in Go and uses goja as its embedded JavaScript engine."
+PACKAGE_LICENSE="MIT"
