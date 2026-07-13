@@ -8,11 +8,11 @@ build_nfpm() {
     local build_failed=0
 
     if ! command -v nfpm &>/dev/null; then
-        logme "[NFPM] Error: nfpm not found. Install it or set USE_NFPM=0"
+        step_start "package"
+        step_fail
+        step_error "nfpm not found. Install it or set USE_NFPM=0"
         return 1
     fi
-
-    logme "[NFPM] Building $DPKG_BASENAME"
 
     local license
     license=$(resolve_package_license "${formula_file}")
@@ -50,26 +50,28 @@ EOF
 
     if [[ "${SKIP_DEB_PACKAGE:-0}" -ne 1 ]]; then
         mkdir -p "$OUTPUT_FOLDER/deb"
-        logme "[NFPM] Building deb"
+        step_start "build deb"
         local new_deb="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
         if ! nfpm pkg --packager deb --config "$nfpm_config" --target "$OUTPUT_FOLDER/deb/" >> "$RUNLOG" 2>&1; then
-            logme "[NFPM] deb build failed. Check $RUNLOG"
+            step_fail
+            step_error "nfpm deb build failed. Check $RUNLOG"
             build_failed=1
         else
-            logme "[NFPM] deb built successfully"
+            step_ok
             find "$OUTPUT_FOLDER/deb/" -name "${DPKG_BASENAME}_*_${DPKG_ARCH}.deb" ! -name "$new_deb" -delete
         fi
     fi
 
     if [[ "${SKIP_RPM_PACKAGE:-0}" -ne 1 ]]; then
         mkdir -p "$OUTPUT_FOLDER/rpm/$TARGET_ARCH"
-        logme "[NFPM] Building rpm"
+        step_start "build rpm"
         local new_rpm="${DPKG_BASENAME}-${DPKG_VERSION}-1.${TARGET_ARCH}.rpm"
         if ! nfpm pkg --packager rpm --config "$nfpm_config" --target "$OUTPUT_FOLDER/rpm/$TARGET_ARCH/" >> "$RUNLOG" 2>&1; then
-            logme "[NFPM] rpm build failed. Check $RUNLOG"
+            step_fail
+            step_error "nfpm rpm build failed. Check $RUNLOG"
             build_failed=1
         else
-            logme "[NFPM] rpm built successfully"
+            step_ok
             find "$OUTPUT_FOLDER/rpm/$TARGET_ARCH/" -name "${DPKG_BASENAME}-*-*.${TARGET_ARCH}.rpm" ! -name "$new_rpm" -delete
         fi
     fi

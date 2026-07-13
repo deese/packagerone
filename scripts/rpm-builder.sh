@@ -15,7 +15,7 @@ build_rpm() {
     # Source the configuration
     #source "$config_file"
     #
-    logme "[RPM] Building $DPKG_BASENAME rpm"
+    step_start "build rpm"
 
 	INSTALL_CMDS=""
     PACKAGE_NAME=$DPKG_BASENAME
@@ -45,8 +45,8 @@ build_rpm() {
             fi
             count=$((count + 1 ))
         else
-            echo "File doesn't exist: $source"
-            print_archive_listing
+            [ -n "$RUNLOG" ] && echo "File doesn't exist: $source" >> "$RUNLOG"
+            print_archive_listing >> "$RUNLOG" 2>&1
         fi
   done
 
@@ -64,15 +64,16 @@ build_rpm() {
   logme -v "[RPM] Creating spec file"
   echo -e "$TEMPLATE" >  $BUILD_FOLDER/rpmbuild/SPECS/$PACKAGE_NAME.spec
 
-  logme -v "[RPM] Running rpmbuild"
   rpmbuild -bb $BUILD_FOLDER/rpmbuild/SPECS/$PACKAGE_NAME.spec --define "_topdir $BUILD_FOLDER/rpmbuild" --define "_rpmdir $OUTPUT_FOLDER/rpm" >> $RUNLOG 2>&1
 
   if [ $? -eq 0 ]; then
       RPM_PKG_NAME=$(ls $OUTPUT_FOLDER/rpm/$TARGET_ARCH/$PACKAGE_NAME*)
-      logme "[RPM] Successfully built rpm package: $RPM_PKG_NAME"
+      step_ok
+      logme -v "[RPM] Successfully built rpm package: $RPM_PKG_NAME"
       return 0
   else
-      logme "[RPM] rpmbuilduild failed. Check $RUNLOG"
+      step_fail
+      step_error "rpmbuild failed. Check $RUNLOG"
       return 1
   fi
 

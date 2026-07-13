@@ -8,8 +8,10 @@ build_deb () {
 
     # Validate required variables
     if [[ -z "$DPKG_BASENAME" || -z "$DOWNLOAD_FILENAME" || -z "$INSTALL_FILES" ]]; then
-        logme "[DEB] Error: Missing required configuration variables"
-        exit 1
+        step_start "build deb"
+        step_fail
+        step_error "Missing required configuration variables"
+        return 1
     fi
 
     # Setup package variables
@@ -19,15 +21,18 @@ build_deb () {
     DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
     DPKG_PATH="$OUTPUT_FOLDER/deb/$DPKG_NAME"
 
+    step_start "build deb"
+
     if [[ "$DPKG_VERSION" =~ [^0-9.-] ]]; then
-      logme "[DEB] Fatal error: \$DPKG_VERSION contains invalid characters: $DPKG_VERSION"
-      exit 1
+      step_fail
+      step_error "\$DPKG_VERSION contains invalid characters: $DPKG_VERSION"
+      return 1
     fi
 
-    logme "[DEB] Building $DPKG_BASENAME deb package"
     # Check if package already exists
     if [[ "$FORCE" -eq 0 && -f "$DPKG_PATH" ]]; then
-        logme "[DEB] File already exists: $DPKG_PATH"
+        step_ok
+        logme -v "[DEB] File already exists: $DPKG_PATH"
         return 0
     fi
 
@@ -35,17 +40,17 @@ build_deb () {
     for entry in "${INSTALL_FILES[@]}"; do
         IFS='|' read -r source perms destination <<< "$entry"
         source=$(var_substitution "$source")
-        echo "Installing $source from $BUILD_FOLDER"
-        if [[ "$source" != "/"* ]]; then 
+        [ -n "$RUNLOG" ] && echo "Installing $source from $BUILD_FOLDER" >> "$RUNLOG"
+        if [[ "$source" != "/"* ]]; then
             source="$BUILD_FOLDER/$source"
-        fi 
+        fi
         if [ -f "$source" ]; then
             install -Dm"$perms" "$source" "${DPKG_DIR}$destination"
         elif [ -d "$source" ]; then
             install -d -Dm"$perms" "$source" "${DPKG_DIR}$destination"
         else
-            echo "File doesn't exist: $source"
-            print_archive_listing
+            [ -n "$RUNLOG" ] && echo "File doesn't exist: $source" >> "$RUNLOG"
+            print_archive_listing >> "$RUNLOG" 2>&1
         fi
     done
 
@@ -74,9 +79,9 @@ EOF
     done
      
     # Build package
-    logme -v "[DEB] Running the builder"
     if ! fakeroot dpkg-deb --build "${DPKG_DIR}" "${DPKG_PATH}" >> "$RUNLOG" 2>&1; then
-        logme "[DEB] dpkg-deb failed. Check $RUNLOG"
+        step_fail
+        step_error "dpkg-deb failed. Check $RUNLOG"
         return 1
     fi
 
@@ -86,6 +91,7 @@ EOF
     #fi
     #rm -fr "${DPKG_DIR}" "$DOWNLOAD_FILENAME"
 
-    logme "[DEB] Successfully built $DPKG_PATH"
-    return 0 
+    step_ok
+    logme -v "[DEB] Successfully built $DPKG_PATH"
+    return 0
 }

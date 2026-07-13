@@ -3,6 +3,13 @@ source "$SCRIPT_DIR/scripts/environ.sh"
 
 mkdir -p $OUTPUT_FOLDER $LOGFOLDER
 
+if [[ -t 1 && -z "${NO_COLOR:-}" ]]; then
+  C_RESET='\033[0m'; C_DIM='\033[2m'; C_BOLD='\033[1m'
+  C_CYAN='\033[36m'; C_GREEN='\033[32m'; C_YELLOW='\033[33m'; C_RED='\033[31m'
+else
+  C_RESET=''; C_DIM=''; C_BOLD=''; C_CYAN=''; C_GREEN=''; C_YELLOW=''; C_RED=''
+fi
+
 function read_env() {
   local filePath="${1:-.env}"
   logme -v Loading environment  $filePath
@@ -249,6 +256,55 @@ logme() {
 
 function pad () {
 	[ "$#" -gt 1 ] && [ -n "$2" ] && printf "%$2.${2#-}s" "$1";
+}
+
+# Live per-package build progress: header -> steps -> success/failure.
+# Errors are only ever printed inline, never re-shown by the caller, to avoid duplication.
+
+pkg_header() {
+  local repo="$1" from="$2" to="$3"
+  printf "${C_CYAN}==>${C_RESET} ${C_BOLD}%s${C_RESET} ${C_DIM}(%s → %s)${C_RESET}\n" "$repo" "$from" "$to"
+  [ -n "$RUNLOG" ] && printf "%s ==> %s (%s -> %s)\n" "$(ts)" "$repo" "$from" "$to" >> "$RUNLOG"
+}
+
+up_to_date() {
+  local repo="$1" ver="$2"
+  printf -- "${C_DIM}--> %-24s up to date (%s)${C_RESET}\n" "$repo" "$ver"
+  [ -n "$RUNLOG" ] && printf -- "%s --> %s up to date (%s)\n" "$(ts)" "$repo" "$ver" >> "$RUNLOG"
+}
+
+step_start() {
+  printf "    ${C_DIM}→${C_RESET} %s..." "$1"
+}
+
+step_ok() {
+  printf " ${C_GREEN}ok${C_RESET}\n"
+}
+
+step_fail() {
+  printf " ${C_RED}FAILED${C_RESET}\n"
+}
+
+step_error() {
+  printf "      ${C_RED}%s${C_RESET}\n" "$1"
+  [ -n "$RUNLOG" ] && printf "%s     %s\n" "$(ts)" "$1" >> "$RUNLOG"
+}
+
+pkg_success() {
+  printf "${C_GREEN}==>${C_RESET} ${C_BOLD}%s${C_RESET} built ${C_GREEN}✔${C_RESET}\n\n" "$1"
+  [ -n "$RUNLOG" ] && printf "%s ==> %s built OK\n" "$(ts)" "$1" >> "$RUNLOG"
+}
+
+pkg_error() {
+  printf "${C_RED}✘ %s: %s${C_RESET}\n" "$1" "$2"
+  [ -n "$RUNLOG" ] && printf "%s ERROR %s: %s\n" "$(ts)" "$1" "$2" >> "$RUNLOG"
+}
+
+pkg_failure() {
+  local repo="$1" step="$2"
+  printf "${C_RED}==>${C_RESET} ${C_RED}%s build failed at '%s'${C_RESET}\n" "$repo" "$step"
+  printf "    ${C_YELLOW}skipping version bump for %s${C_RESET}\n\n" "$repo"
+  [ -n "$RUNLOG" ] && printf "%s ==> %s build failed at '%s'\n" "$(ts)" "$repo" "$step" >> "$RUNLOG"
 }
 
 function logme_old () {
