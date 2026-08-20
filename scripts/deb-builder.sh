@@ -47,7 +47,8 @@ build_deb () {
         if [ -f "$source" ]; then
             install -Dm"$perms" "$source" "${DPKG_DIR}$destination"
         elif [ -d "$source" ]; then
-            install -d -Dm"$perms" "$source" "${DPKG_DIR}$destination"
+            install -d -m"$perms" "${DPKG_DIR}$destination"
+            cp -a "$source/." "${DPKG_DIR}$destination/"
         else
             [ -n "$RUNLOG" ] && echo "File doesn't exist: $source" >> "$RUNLOG"
             print_archive_listing >> "$RUNLOG" 2>&1

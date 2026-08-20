@@ -114,22 +114,29 @@ build_package() {
 
     # Extract if needed
     step_start "extract"
+    rc=0
 
     if [[ -n "$EXTRACT_CMD" ]]; then
         if [[ "$EXTRACT_CMD" == *"tar"* ]]; then
-            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER" >> "$RUNLOG" 2>&1
+            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -C "$BUILD_FOLDER" >> "$RUNLOG" 2>&1 || rc=$?
         elif [[ "$EXTRACT_CMD" == "unzip" ]]; then
-            unzip -o "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -d "$BUILD_FOLDER" >> "$RUNLOG" 2>&1
+            unzip -o "$BUILD_FOLDER/$DOWNLOAD_FILENAME" -d "$BUILD_FOLDER" >> "$RUNLOG" 2>&1 || rc=$?
         elif [[ "$EXTRACT_CMD" == "cp" ]]; then
             #cp "$BUILD_FOLDER/$DOWNLOAD_FILENAME" "$BUILD_FOLDER"
             true
         elif [[ "$EXTRACT_CMD" == "gunzip" ]]; then
-            gunzip "$BUILD_FOLDER/$DOWNLOAD_FILENAME" >> "$RUNLOG" 2>&1
+            gunzip "$BUILD_FOLDER/$DOWNLOAD_FILENAME" >> "$RUNLOG" 2>&1 || rc=$?
         else
-            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" >> "$RUNLOG" 2>&1
+            $EXTRACT_CMD "$BUILD_FOLDER/$DOWNLOAD_FILENAME" >> "$RUNLOG" 2>&1 || rc=$?
         fi
     fi
 
+    if [[ $rc -ne 0 ]]; then
+        step_fail
+        step_error "extraction failed (rc=$rc). Check $RUNLOG"
+        pkg_failure "$pkg_name" "extract"
+        return 1
+    fi
     step_ok
 
     if [[ "${USE_NFPM:-0}" -eq 1 ]]; then

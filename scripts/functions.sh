@@ -62,7 +62,7 @@ function resolve_package_license() {
     if [[ -n "${REPO:-}" ]]; then
         local license
         if license=$(get_repo_license "$REPO") && [[ -n "$license" ]]; then
-            logme "[NFPM] License for ${REPO}: ${license}"
+            logme "[NFPM] License for ${REPO}: ${license}" >&2
             [[ -n "$formula_file" ]] && echo "PACKAGE_LICENSE=\"${license}\"" >> "$formula_file"
             PACKAGE_LICENSE="$license"
             echo "$license"
@@ -80,8 +80,22 @@ function resolve_package_license() {
     return 0
 }
 
+# Cache key shared between the version-prefetch phase (runner.sh) and the
+# get_latest_ver* lookups below, so both sides derive the same filename.
+function version_cache_key() {
+    case "$1" in
+        github)    echo "github_${2//\//_}" ;;
+        url_html)  echo "html_${2}" ;;
+        hashicorp) echo "hashicorp_${2}" ;;
+    esac
+}
+
 function get_latest_ver_hashicorp() {
     local product="$1"
+    if [[ -n "${VERSION_CACHE_DIR:-}" ]]; then
+        local cache_file="$VERSION_CACHE_DIR/$(version_cache_key hashicorp "$product")"
+        [[ -f "$cache_file" ]] && cat "$cache_file" && return 0
+    fi
     local result
     result=$(curl -qsL "https://api.releases.hashicorp.com/v1/releases/${product}/latest" | jq -r '.version')
     if [[ -z "$result" || "$result" == "null" ]]; then
@@ -94,6 +108,12 @@ function get_latest_ver_hashicorp() {
 function get_latest_ver_html() {
     local url="$1"
     local regex="$2"
+    # Keyed by DPKG_BASENAME (global, already sourced from the formula by the
+    # caller) to match the key the prefetch phase derives for this formula.
+    if [[ -n "${VERSION_CACHE_DIR:-}" && -n "${DPKG_BASENAME:-}" ]]; then
+        local cache_file="$VERSION_CACHE_DIR/$(version_cache_key url_html "$DPKG_BASENAME")"
+        [[ -f "$cache_file" ]] && cat "$cache_file" && return 0
+    fi
     local result
     result=$(curl -qsL "$url" | grep -oP "$regex" | head -1)
     if [[ -z "$result" ]]; then
@@ -104,6 +124,15 @@ function get_latest_ver_html() {
 }
 
 function get_latest_ver () {
+	# The cache only ever stores the plain tag_name (no $2/date mode), so
+	# bypass it when the caller asked for the tag+date form.
+	if [[ -z "${2:-}" && -n "${VERSION_CACHE_DIR:-}" ]]; then
+	    cache_file="$VERSION_CACHE_DIR/$(version_cache_key github "$1")"
+	    if [[ -f "$cache_file" ]]; then
+	        cat "$cache_file"
+	        return 0
+	    fi
+	fi
 	if [[ ! -z $GITHUB_TOKEN ]]; then
 	   EXTRA_ARGS=(
             -H "Authorization: Bearer $GITHUB_TOKEN"
@@ -254,10 +283,6 @@ logme() {
   fi
 }
 
-function pad () {
-	[ "$#" -gt 1 ] && [ -n "$2" ] && printf "%$2.${2#-}s" "$1";
-}
-
 # Live per-package build progress: header -> steps -> success/failure.
 # Errors are only ever printed inline, never re-shown by the caller, to avoid duplication.
 
@@ -306,54 +331,6 @@ pkg_failure() {
   printf "    ${C_YELLOW}skipping version bump for %s${C_RESET}\n\n" "$repo"
   [ -n "$RUNLOG" ] && printf "%s ==> %s build failed at '%s'\n" "$(ts)" "$repo" "$step" >> "$RUNLOG"
 }
-
-function logme_old () {
-    EOL="\n"
-    if [ ! -z "$RUNLOG" ]; then
-        echo "$(ts) $1" >> $RUNLOG
-    fi
-    if [[ $2 -eq 1 ]]; then
-      vprint "$1"
-    else
-      if [[ ! -z "$2" ]]; then
-        EOL="$2"
-      fi
-      echo -n "$1$EOL"
-    fi
-}
-
-max_strlen() {
-    local mode=$1
-    local max=0 len item
-
-    if [[ $mode == "line" ]]; then
-        while IFS= read -r item; do
-            len=${#item}
-            (( len > max )) && max=$len
-        done
-    else # default: word mode
-        for item in "$@"; do
-            len=${#item}
-            (( len > max )) && max=$len
-        done
-    fi
-
-    echo "$max"
-}
-
-
-downloader () {
-    URL="$1"
-    DEST="$2"
-
-    if ! $WGET--timeout=20 --tries=3 -O "$DEST" "$URL"; then
-        rc=$?
-        echo "WARN: wget failed (rc=$rc) for $url" >&2
-    else
-        echo "0"
-    fi
-}
-
 
 # Print archive contents and a short tree of the build folder to aid troubleshooting
 print_archive_listing() {

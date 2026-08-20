@@ -12,7 +12,6 @@ DB_FILE="$SCRIPT_DIR/versions.db"
 LOGFOLDER="$SCRIPT_DIR/logs"
 RUNLOG="$LOGFOLDER/$(date +"%Y%m%d%H%M%S-pkgone.log")"
 VERBOSE=0
-PAD_SIZE=-20
 USE_NFPM=0
 
 mkdir -p $OUTPUT_FOLDER $LOGFOLDER

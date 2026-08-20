@@ -1,7 +1,12 @@
 #!/bin/bash
 CDIR=$(dirname -- "${BASH_SOURCE[0]}")
 TMPFOLDER=$(mktemp -dt "pkgone-XXXXXXXX")
-WGET="wget -q"
+VERBOSE="${VERBOSE:-0}"
+if [[ "$VERBOSE" -eq 1 ]]; then
+    WGET="wget"
+else
+    WGET="wget -q"
+fi
 LATEST_FILE="$TMPFOLDER/latest.json"
 DOWNLOAD_LINKS="$TMPFOLDER/links.txt"
 OUTPUT_GPT="output_gpt.log"
@@ -50,6 +55,23 @@ function var_substitution {
 
 function stderr {
     echo "$1" >&2
+}
+
+function check_formula_not_exists {
+    local package_name="$1"
+    FORMULA_FILE="formulas/${package_name}-pkg.formula"
+    if [ -f "$FORMULA_FILE" ]; then
+        echo "Formula already exists: $FORMULA_FILE"
+        if [ "${FORCE:-0}" -ne 1 ]; then
+            exit 1
+        else
+            echo "Force is on. Continuing"
+        fi
+    fi
+}
+
+function vstderr {
+    [[ "$VERBOSE" -eq 1 ]] && echo "$1" >&2
 }
 
 # ── Type detection ────────────────────────────────────────────────────────────
@@ -375,14 +397,19 @@ function query_ai {
 function get_file_listing {
     FILENAME=$(basename "$DOWNLOAD_LINK")
     FILENAME="$TMPFOLDER/$FILENAME"
+    vstderr "Downloading $DOWNLOAD_LINK -> $FILENAME"
     if [ ! -f "$FILENAME" ]; then
         $WGET "$DOWNLOAD_LINK" -O "$FILENAME"
+        local wget_status=$?
+        vstderr "wget exit code: $wget_status"
     fi
 
     if [ ! -f "$FILENAME" ]; then
-        stderr "Error downloading file"
+        stderr "Error downloading file: $DOWNLOAD_LINK (no file produced at $FILENAME)"
         exit 1
     fi
+
+    vstderr "Downloaded file: $FILENAME ($(du -h "$FILENAME" 2>/dev/null | cut -f1), type: $(file -b "$FILENAME" 2>/dev/null))"
 
     case "$FILENAME" in
         *.tar|*.tar.gz|*.tar.bz2|*.tar.xz|*.tgz|*.tbz|*.txz)
@@ -394,7 +421,9 @@ function get_file_listing {
             echo -e "$FILELIST"
             ;;
         *)
-            echo ""
+            stderr "'$FILENAME' is not a recognized archive (tar/zip); detected type: $(file -b "$FILENAME" 2>/dev/null)."
+            stderr "Treating download as a single raw binary; using its filename as the file listing."
+            echo "$(basename "$FILENAME")"
             ;;
     esac
 }
@@ -411,6 +440,7 @@ case "$FORMULA_TYPE" in
             stderr "Warning: Could not parse GitHub repository from input: $1"
         fi
         PACKAGE_NAME=$(basename "$REPO")
+        check_formula_not_exists "$PACKAGE_NAME"
         DOWNLOAD_LINK=$(get_repo_data "$REPO")
         echo "Download link: $DOWNLOAD_LINK"
         if [[ "$DOWNLOAD_LINK" != *"https://github.com"* ]]; then
@@ -426,6 +456,7 @@ Repo description: $REPO_DESCRIPTION"
     hashicorp)
         HASHICORP_PRODUCT="${1#hashicorp:}"
         PACKAGE_NAME="$HASHICORP_PRODUCT"
+        check_formula_not_exists "$PACKAGE_NAME"
         get_hashicorp_data "$HASHICORP_PRODUCT"
         echo "Download link: $DOWNLOAD_LINK"
         TYPE_CONTEXT="HASHICORP_PRODUCT: $HASHICORP_PRODUCT"
@@ -437,6 +468,7 @@ Repo description: $REPO_DESCRIPTION"
         PACKAGE_NAME=$(basename "$VERSION_URL" | sed 's/[^a-zA-Z0-9_-]//g')
         read -p "Package name [$PACKAGE_NAME]: " user_input
         [[ -n "$user_input" ]] && PACKAGE_NAME="$user_input"
+        check_formula_not_exists "$PACKAGE_NAME"
         get_url_html_data "$VERSION_URL"
         echo "Download link: $DOWNLOAD_LINK"
 
@@ -465,17 +497,6 @@ Repo description: $REPO_DESCRIPTION"
 VERSION_REGEX ($regex_label): $DERIVED_REGEX"
         ;;
 esac
-
-FORMULA_FILE="formulas/${PACKAGE_NAME}-pkg.formula"
-
-if [ -f "$FORMULA_FILE" ]; then
-    echo "Formula already exists: $FORMULA_FILE"
-    if [ "${FORCE:-0}" -ne 1 ]; then
-        exit 1
-    else
-        echo "Force is on. Continuing"
-    fi
-fi
 
 FILELIST=$(get_file_listing)
 if [ -z "$FILELIST" ]; then

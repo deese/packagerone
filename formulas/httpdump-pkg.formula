@@ -1,0 +1,14 @@
+REPO="deese/httpdump"
+DPKG_BASENAME="httpdump"
+HOMEPAGE="https://github.com/deese/httpdump"
+DOWNLOAD_FILENAME="httpdump-linux-amd64"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="cp"
+INSTALL_FILES=(
+    "httpdump-linux-amd64|755|/usr/bin/httpdump"
+)
+CLEANUP_FILES="httpdump-linux-amd64"
+PACKAGE_DESCRIPTION="httpdump is a tool for capturing and analyzing HTTP traffic."
+PACKAGE_SUMMARY=""
+PACKAGE_LICENSE="unknown"
+PACKAGE_SUMMARY="httpdump is a tool for capturing and analyzing HTTP traffic."

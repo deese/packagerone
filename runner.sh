@@ -17,9 +17,8 @@ function do_upload {
     if [ ! -z "$PKG1UPLOADER" ]; then
         logme -v "Uploader set to: $PKG1UPLOADER"
       if [ ! -f "$SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh" ]; then
-        logme "uploader_$PKG1UPLOADER.sh doesn't exit"
-        echo "uploader_$PKG1UPLOADER.sh doesn't exit"
-        exit
+        logme "uploader_$PKG1UPLOADER.sh doesn't exist"
+        exit 1
       fi
       logme "Running uploader - $PKG1UPLOADER"
       bash $SCRIPT_DIR/scripts/uploader_$PKG1UPLOADER.sh $CHANGES_FILE
@@ -29,13 +28,44 @@ function cleanup {
   if [ -f $CHANGES_FILE ]; then
     rm -f $CHANGES_FILE
   fi
-  if [ -f "$BUILD_FOLDER" ]; then
-    logme -v "Removing build folder: $BUILD_FOLDER"
-    rm -fr "$BUILD_FOLDER"
+  if [ -d "${_TMPFOLDER:-}" ]; then
+    logme -v "Removing temp folder: $_TMPFOLDER"
+    rm -rf "$_TMPFOLDER"
+  fi
+  if [ -d "${VERSION_CACHE_DIR:-}" ]; then
+    rm -rf "$VERSION_CACHE_DIR"
   fi
   unset CHANGES_FILE
 }
 trap cleanup EXIT
+
+# Resolve the version of every formula concurrently before the (serial) build
+# loop, so the ~30 sequential GitHub/HashiCorp/HTML lookups don't dominate an
+# all-up-to-date run. Builds themselves stay serial (shared BUILD_FOLDER,
+# versions.db written with sed -i). Self-healing: a job that fails to write a
+# cache file just falls through to a live lookup during the build phase.
+function prefetch_versions {
+    export VERSION_CACHE_DIR=$(mktemp -d)
+    local max_jobs=8
+
+    for formula in "$SCRIPT_DIR"/formulas/*.formula; do
+        (
+            unset FORMULA_TYPE REPO HASHICORP_PRODUCT VERSION_URL VERSION_REGEX DPKG_BASENAME
+            source "$formula"
+            local ftype="${FORMULA_TYPE:-github}"
+            local key ver
+            case "$ftype" in
+                github)    key=$(version_cache_key github "$REPO"); ver=$(get_latest_ver "$REPO") ;;
+                url_html)  key=$(version_cache_key url_html "$DPKG_BASENAME"); ver=$(get_latest_ver_html "$VERSION_URL" "$VERSION_REGEX") ;;
+                hashicorp) key=$(version_cache_key hashicorp "$HASHICORP_PRODUCT"); ver=$(get_latest_ver_hashicorp "$HASHICORP_PRODUCT") ;;
+                *) exit 0 ;;
+            esac
+            [[ -n "$ver" ]] && printf '%s' "$ver" > "$VERSION_CACHE_DIR/$key"
+        ) &
+        while (( $(jobs -rp | wc -l) >= max_jobs )); do wait -n; done
+    done
+    wait
+}
 
 read_env $SCRIPT_DIR/.env
 
@@ -87,7 +117,7 @@ while getopts "ufVvhF:b:RD" opt; do
 done
 
 if [[ -n "$FORMULA_TO_CREATE" ]]; then
-    FORCE=$FORCE bash $SCRIPT_DIR/scripts/creator/formula_creator.sh "$FORMULA_TO_CREATE"
+    FORCE=$FORCE VERBOSE=$VERBOSE bash $SCRIPT_DIR/scripts/creator/formula_creator.sh "$FORMULA_TO_CREATE"
     exit 0
 fi
 
@@ -108,6 +138,8 @@ if [[ $check_versions -eq 1 ]]; then
   bash $SCRIPT_DIR/scripts/version_check.sh
   exit 1
 fi
+
+prefetch_versions
 
 for i in $SCRIPT_DIR/formulas/*.formula; do
   build_package $i || logme "[ERROR] Failed to process formula: $i"

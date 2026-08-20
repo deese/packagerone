@@ -13,20 +13,6 @@ function upload {
 }
 
 
-function check_output {
-	filename=$1
-	output="$2"
-	if [[ "$output" == *"This registry does not support that package type"* ]]; then
-	    logme "Upload FAILED: $( echo $output | jq -r '.message')"
-	elif [[ "$output" == *"A package with that name already exists"* || "$output" == *'{"id":'* ]]; then
-	    logme "SUCCESS"
-        echo $filename >> $PKG1UPLOADTRK
-	else
-	    logme "Upload FAILED: $(echo $output | jq -r '.message')"
-	fi
-}
-
-
 if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
     echo "Manual task - Running uploads"
     OUTPUT_FOLDER="$PWD/dist"
