@@ -27,6 +27,7 @@ PACKAGER_NAME=Your Name
 PACKAGER_EMAIL=you@example.com
 VERBOSE=0
 USE_NFPM=1
+APPRISE_URL=https://user:pass@host/notify/apprise?tag=tg_home  # Required only for -c (cron mode)
 ```
 
 ---
@@ -57,6 +58,22 @@ bash runner.sh -u
 
 # Enable verbose output
 bash runner.sh -v
+
+# Cron mode: silence stdout, keep the run log under logs/, send an
+# Apprise/Telegram summary of what was updated (or failed) at the end
+bash runner.sh -c
+
+# Print the last run log
+bash runner.sh -L
+
+# Send the last run log to an LLM (via OpenRouter) to explain what failed
+# and how to fix it (requires OPENROUTER_API_KEY)
+bash runner.sh -L --analyze
+
+# Check every formula's resolved download against upstream (catches things
+# like a GitHub repo's "latest release" pointing at a sub-crate/library tag
+# with no CLI binary attached, a renamed asset, or a dead download URL)
+bash runner.sh -C
 ```
 
 Flags can be combined: `bash runner.sh -f -D -v`

@@ -89,6 +89,15 @@ build_package() {
 
     # Setup package variables
     DPKG_VERSION=$(echo "${LATEST_VER}" | sed 's/^[^0-9]*//')
+    # Pad to major.minor.patch: nfpm normalizes short versions (e.g. "1.0" -> "1.0.0")
+    # when writing package filenames, so the cleanup step in nfpm-builder.sh must
+    # predict the same normalized name or it deletes the package it just built.
+    IFS='.' read -ra _dpkg_version_parts <<< "$DPKG_VERSION"
+    while [ ${#_dpkg_version_parts[@]} -lt 3 ]; do
+        _dpkg_version_parts+=("0")
+    done
+    DPKG_VERSION=$(IFS='.'; echo "${_dpkg_version_parts[*]}")
+    unset _dpkg_version_parts
     DPKG_DIR="${DPKG_BASENAME}-${LATEST_VER}-${TARGET_ARCH}"
     DPKG_NAME="${DPKG_BASENAME}_${DPKG_VERSION}_${DPKG_ARCH}.deb"
     DPKG_PATH="./$OUTPUT_FOLDER/$DPKG_NAME"
@@ -104,6 +113,19 @@ build_package() {
     $WGET "$DOWNLOAD_URL" -O  "$BUILD_FOLDER/$DOWNLOAD_FILENAME"  ||  rc=$?
 
     if [[ ! -z $rc && $rc -ne 0 ]]; then
+        # A github-type formula whose latest release has no assets (e.g. a
+        # sub-crate/library-only release) is an upstream condition, not a
+        # broken formula/pipeline: report it as a warning instead of an error.
+        if [[ "$_ftype" == "github" ]]; then
+            local asset_count
+            asset_count=$(get_github_release_asset_count "$REPO") || asset_count=""
+            if [[ "$asset_count" == "0" ]]; then
+                step_warn
+                step_warning "latest release $LATEST_VER has no assets (likely a non-CLI/sub-crate release)"
+                pkg_warning "$pkg_name" "latest release $LATEST_VER has no assets upstream"
+                return 2
+            fi
+        fi
         step_fail
         step_error "wget failed (rc=$rc) for $DOWNLOAD_URL"
         pkg_failure "$pkg_name" "download"

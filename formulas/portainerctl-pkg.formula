@@ -1,0 +1,15 @@
+REPO="portainer/portainerctl"
+DPKG_BASENAME="portainerctl"
+HOMEPAGE="https://github.com/portainer/portainerctl"
+DOWNLOAD_FILENAME="portainerctl_\${DPKG_VERSION}_linux_\${DPKG_ARCH}.tar.gz"
+DOWNLOAD_URL_TEMPLATE="https://github.com/\$REPO/releases/download/\$LATEST_VER/\$DOWNLOAD_FILENAME"
+EXTRACT_CMD="tar zxf"
+INSTALL_FILES=(
+    "portainerctl|755|/usr/bin/portainerctl"
+    "LICENSE|644|/usr/share/portainerctl/LICENSE"
+    "README.md|644|/usr/share/portainerctl/README.md"
+)
+CLEANUP_FILES="portainerctl LICENSE README.md"
+PACKAGE_DESCRIPTION="portainerctl is a command line utility to interact with Portainer over REST API."
+PACKAGE_SUMMARY="A command line utility to interact with Portainer over REST API"
+PACKAGE_LICENSE="Zlib"

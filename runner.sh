@@ -11,6 +11,16 @@ source "$SCRIPT_DIR/scripts/rpm-builder.sh"
 packages=(
 )
 
+# -L and -C are read-only actions (print/analyze the last log, check formula
+# config); don't let them create a new (near-empty) log file of their own
+# before we even parse options.
+for arg in "$@"; do
+    if [[ "$arg" =~ ^-[a-zA-Z]*[LC][a-zA-Z]*$ ]]; then
+        unset RUNLOG
+        break
+    fi
+done
+
 export CHANGES_FILE=$(mktemp --suffix ".changes")
 
 function do_upload {
@@ -25,6 +35,11 @@ function do_upload {
     fi
 }
 function cleanup {
+  if [ "${CRON_NOTIFY:-0}" -eq 1 ]; then
+    logme "Cron run finished. Sending summary."
+    summary="$(build_cron_summary "$RUNLOG")"
+    send_apprise_notification "PackageOne ($(hostname))" "$summary"$'\n\n'
+  fi
   if [ -f $CHANGES_FILE ]; then
     rm -f $CHANGES_FILE
   fi
@@ -88,8 +103,23 @@ function resolve_formula {
 FORMULA_TO_BUILD=""
 FORMULA_TO_CREATE=""
 DO_UPLOAD=0
+CRON_MODE=0
+LOG_MODE=0
+ANALYZE_MODE=0
 
-while getopts "ufVvhF:b:RD" opt; do
+# getopts can't parse the long-form "--analyze" flag alongside short options,
+# so strip it out of the argument list up front and track it separately.
+ARGS=()
+for arg in "$@"; do
+    if [[ "$arg" == "--analyze" ]]; then
+        ANALYZE_MODE=1
+    else
+        ARGS+=("$arg")
+    fi
+done
+set -- "${ARGS[@]}"
+
+while getopts "ufVvhF:b:RDcLC" opt; do
   case "$opt" in
     b) FORMULA_TO_BUILD="$OPTARG" ;;
     F) FORMULA_TO_CREATE="$OPTARG" ;;
@@ -99,13 +129,19 @@ while getopts "ufVvhF:b:RD" opt; do
     u) DO_UPLOAD=1 ;;
     R) SKIP_RPM_PACKAGE=1 ;;
     D) SKIP_DEB_PACKAGE=1 ;;
+    c) CRON_MODE=1 ;;
+    L) LOG_MODE=1 ;;
+    C) CHECK_FORMULAS=1 ;;
     *)
-      echo "Usage: $0 [-V] [-v] [-f] [-R] [-D]"
+      echo "Usage: $0 [-V] [-v] [-f] [-R] [-D] [-c] [-L [--analyze]] [-C]"
       echo "-----"
       echo "-b - Build specific formula"
+      echo "-c - Cron mode: silence stdout, keep the run log, send an Apprise/Telegram summary at the end"
+      echo "-C - Check every formula's resolved download against upstream and exit"
       echo "-D - Skip DEB package creation"
       echo "-f - force build without checking versions"
       echo "-F <repository/name> - Automatically create formulas using AI (this requires human review)"
+      echo "-L [--analyze] - Print the last run log; with --analyze, send it to an LLM (OpenRouter) to explain the failure"
       echo "-R - Skip RPM package creation"
       echo "-u - Upload created packages"
       echo "-v - Enable verbose mode"
@@ -115,6 +151,27 @@ while getopts "ufVvhF:b:RD" opt; do
       ;;
   esac
 done
+shift $((OPTIND - 1))
+
+if [[ "${CHECK_FORMULAS:-0}" -eq 1 ]]; then
+    echo "Checking formula configuration against upstream..."
+    bash "$SCRIPT_DIR/scripts/check_formulas.sh"
+    exit $?
+fi
+
+if [[ "$LOG_MODE" -eq 1 ]]; then
+    LATEST_LOG=$(ls -t "$LOGFOLDER"/*.log 2>/dev/null | head -1)
+    if [[ -z "$LATEST_LOG" ]]; then
+        echo "No log files found in $LOGFOLDER" >&2
+        exit 1
+    fi
+    if [[ "$ANALYZE_MODE" -eq 1 ]]; then
+        analyze_log "$LATEST_LOG"
+    else
+        cat "$LATEST_LOG"
+    fi
+    exit 0
+fi
 
 if [[ -n "$FORMULA_TO_CREATE" ]]; then
     FORCE=$FORCE VERBOSE=$VERBOSE bash $SCRIPT_DIR/scripts/creator/formula_creator.sh "$FORMULA_TO_CREATE"
@@ -139,14 +196,30 @@ if [[ $check_versions -eq 1 ]]; then
   exit 1
 fi
 
+if [[ $CRON_MODE -eq 1 ]]; then
+    exec >/dev/null 2>&1
+    CRON_NOTIFY=1
+    logme "Cron run started"
+fi
+
 prefetch_versions
 
 for i in $SCRIPT_DIR/formulas/*.formula; do
-  build_package $i || logme "[ERROR] Failed to process formula: $i"
+  rc=0
+  build_package $i || rc=$?
+  if [[ $rc -eq 2 ]]; then
+    logme "[WARN] No upstream assets to build formula: $i"
+  elif [[ $rc -ne 0 ]]; then
+    logme "[ERROR] Failed to process formula: $i"
+  fi
 done
 
 if [ -s $CHANGES_FILE ]; then
     logme "Changes detected. Running upload script if available."
-    do_upload
+    if [[ $CRON_MODE -eq 1 ]]; then
+        do_upload || logme "[ERROR] Upload step failed"
+    else
+        do_upload
+    fi
 fi
 

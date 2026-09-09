@@ -310,8 +310,17 @@ step_fail() {
   printf " ${C_RED}FAILED${C_RESET}\n"
 }
 
+step_warn() {
+  printf " ${C_YELLOW}WARN${C_RESET}\n"
+}
+
 step_error() {
   printf "      ${C_RED}%s${C_RESET}\n" "$1"
+  [ -n "$RUNLOG" ] && printf "%s     %s\n" "$(ts)" "$1" >> "$RUNLOG"
+}
+
+step_warning() {
+  printf "      ${C_YELLOW}%s${C_RESET}\n" "$1"
   [ -n "$RUNLOG" ] && printf "%s     %s\n" "$(ts)" "$1" >> "$RUNLOG"
 }
 
@@ -330,6 +339,145 @@ pkg_failure() {
   printf "${C_RED}==>${C_RESET} ${C_RED}%s build failed at '%s'${C_RESET}\n" "$repo" "$step"
   printf "    ${C_YELLOW}skipping version bump for %s${C_RESET}\n\n" "$repo"
   [ -n "$RUNLOG" ] && printf "%s ==> %s build failed at '%s'\n" "$(ts)" "$repo" "$step" >> "$RUNLOG"
+}
+
+# pkg_warning: like pkg_failure, but for a known non-error upstream condition
+# (e.g. a GitHub "latest release" with no assets attached) that still means
+# we can't build this run, without it being a config/pipeline bug.
+pkg_warning() {
+  local repo="$1" msg="$2"
+  printf "${C_YELLOW}==>${C_RESET} ${C_YELLOW}%s: %s${C_RESET}\n" "$repo" "$msg"
+  printf "    ${C_DIM}skipping version bump for %s${C_RESET}\n\n" "$repo"
+  [ -n "$RUNLOG" ] && printf "%s ==> WARN %s: %s\n" "$(ts)" "$repo" "$msg" >> "$RUNLOG"
+}
+
+# get_github_release_asset_count: number of assets attached to a repo's
+# latest GitHub release, or empty on API failure (caller should treat that as
+# "unknown", not as zero).
+get_github_release_asset_count() {
+    local repo="$1"
+    local extra_args=()
+    if [[ -n "${GITHUB_TOKEN:-}" ]]; then
+        extra_args=(
+            -H "Authorization: Bearer $GITHUB_TOKEN"
+            -H "Accept: application/vnd.github+json"
+        )
+    fi
+    local output
+    output=$(curl "${extra_args[@]}" -qs "https://api.github.com/repos/${repo}/releases/latest")
+    jq -r '.assets | length' <<< "$output" 2>/dev/null
+}
+
+# build_cron_summary: turn one run's RUNLOG into a short human-readable report
+# (packages updated, packages warned, packages failed). Relies on the
+# "==> NAME (FROM -> TO)", "==> NAME built OK", "==> WARN NAME: MSG",
+# "==> NAME build failed at 'STEP'" and "ERROR NAME: MSG" lines already
+# written by pkg_header/pkg_success/pkg_warning/pkg_failure/pkg_error.
+build_cron_summary() {
+    local runlog="$1"
+    local -A pending_ver=()
+    local updated=() warned=() failed=()
+    local line name range step
+
+    while IFS= read -r line; do
+        if [[ "$line" == *" ==> "*" ("*" -> "*")" ]]; then
+            name=$(sed -E 's/^.*==> ([^ ]+) \(.*$/\1/' <<< "$line")
+            range=$(sed -E 's/^.*\((.*)\)$/\1/' <<< "$line")
+            pending_ver["$name"]="$range"
+        elif [[ "$line" == *" ==> "*" built OK" ]]; then
+            name=$(sed -E 's/^.*==> (.*) built OK$/\1/' <<< "$line")
+            updated+=("- ${name}: ${pending_ver[$name]:-updated}")
+        elif [[ "$line" == *" ==> WARN "* ]]; then
+            name=$(sed -E 's/^.*==> WARN ([^:]+):.*$/\1/' <<< "$line")
+            step=$(sed -E 's/^.*==> WARN [^:]+: (.*)$/\1/' <<< "$line")
+            warned+=("- ${name}: ${step}")
+        elif [[ "$line" == *" ==> "*" build failed at "* ]]; then
+            name=$(sed -E "s/^.*==> (.*) build failed at '.*'\$/\1/" <<< "$line")
+            step=$(sed -E "s/^.*build failed at '(.*)'\$/\1/" <<< "$line")
+            failed+=("- ${name}: failed at ${step}")
+        elif [[ "$line" == *" ERROR "* ]]; then
+            failed+=("- $(sed -E 's/^.*ERROR //' <<< "$line")")
+        fi
+    done < "$runlog"
+
+    if [[ ${#updated[@]} -eq 0 && ${#warned[@]} -eq 0 && ${#failed[@]} -eq 0 ]]; then
+        echo "No updates. All packages up to date."
+        return 0
+    fi
+
+    if [[ ${#updated[@]} -gt 0 ]]; then
+        printf 'Updated (%d):\n' "${#updated[@]}"
+        printf '%s\n' "${updated[@]}"
+    fi
+    if [[ ${#warned[@]} -gt 0 ]]; then
+        [[ ${#updated[@]} -gt 0 ]] && printf '\n'
+        printf 'Warnings (%d):\n' "${#warned[@]}"
+        printf '%s\n' "${warned[@]}"
+    fi
+    if [[ ${#failed[@]} -gt 0 ]]; then
+        [[ ${#updated[@]} -gt 0 || ${#warned[@]} -gt 0 ]] && printf '\n'
+        printf 'Failed (%d):\n' "${#failed[@]}"
+        printf '%s\n' "${failed[@]}"
+    fi
+}
+
+# send_apprise_notification: post a title/body message to the Apprise webhook
+# configured in APPRISE_URL (.env). No-op (with a log line) if unset.
+send_apprise_notification() {
+    local title="$1" body="$2"
+
+    if [[ -z "${APPRISE_URL:-}" ]]; then
+        logme "APPRISE_URL not set, skipping notification"
+        return 0
+    fi
+
+    local payload
+    payload=$(jq -n --arg title "$title" --arg body "$body" '{title: $title, body: $body}')
+
+    if ! curl -fsS -X POST "$APPRISE_URL" -H 'Content-Type: application/json' -d "$payload" >/dev/null; then
+        logme "Failed to send Apprise notification"
+    fi
+}
+
+# analyze_log: send a run log to an LLM (via OpenRouter) and print back what
+# failed and how to fix it. Only the tail of the log is sent to keep the
+# request small.
+analyze_log() {
+    local logfile="$1"
+
+    if [[ -z "${OPENROUTER_API_KEY:-}" ]]; then
+        echo "Set OPENROUTER_API_KEY in .env to use log analysis (-L --analyze)." >&2
+        return 1
+    fi
+
+    local model="${ANALYZE_MODEL:-anthropic/claude-sonnet-4.6}"
+    local log_content
+    log_content=$(tail -n 500 "$logfile")
+
+    local system_prompt="You are a build-log analyst for packagerone, a DEB/RPM packaging pipeline. Given a run log, identify what failed and why, then give a concise, actionable fix."
+
+    local payload
+    payload=$(jq -n \
+        --arg model "$model" \
+        --arg system "$system_prompt" \
+        --arg user "$log_content" \
+        '{
+            model: $model,
+            temperature: 0.0,
+            max_tokens: 1024,
+            messages: [
+                {role: "system", content: $system},
+                {role: "user", content: $user}
+            ]
+        }')
+
+    local resp
+    resp=$(curl -qsX POST "https://openrouter.ai/api/v1/chat/completions" \
+        -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+        -H "Content-Type: application/json" \
+        -d "$payload")
+
+    echo "$resp" | jq -r '.choices[0].message.content // .error.message // "No response from LLM."'
 }
 
 # Print archive contents and a short tree of the build folder to aid troubleshooting
